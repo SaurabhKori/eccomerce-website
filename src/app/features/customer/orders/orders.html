@@ -1,0 +1,171 @@
+<div class="orders-page">
+  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
+  
+  <div class="orders-main" [class.sidebar-collapsed]="sidebarCollapsed">
+    <!-- Page Header -->
+    <div class="page-header">
+      <h1>My Orders</h1>
+      <div class="header-actions">
+        <button class="btn btn-primary" (click)="routes('/products')">
+          <i class="fas fa-shopping-bag"></i> Continue Shopping
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+      <form [formGroup]="filterForm" class="filters-form">
+        <div class="filter-group">
+          <label>Status</label>
+          <select formControlName="status" class="form-control">
+            <option value="">All Orders</option>
+            <option value="Pending">Pending</option>
+            <option value="Confirmed">Confirmed</option>
+            <option value="Shipped">Shipped</option>
+            <option value="Delivered">Delivered</option>
+            <option value="Cancelled">Cancelled</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Search</label>
+          <input type="text" formControlName="search" class="form-control" placeholder="Order ID or product name">
+        </div>
+        
+        <div class="filter-group">
+          <label>Date Range</label>
+          <select formControlName="dateRange" class="form-control">
+            <option value="">All Time</option>
+            <option value="7">Last 7 Days</option>
+            <option value="30">Last 30 Days</option>
+            <option value="90">Last 3 Months</option>
+            <option value="365">Last Year</option>
+          </select>
+        </div>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading orders...</p>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && filteredOrders.length === 0" class="empty-orders">
+      <i class="fas fa-box-open"></i>
+      <h3>{{orders.length === 0 ? 'No orders yet' : 'No orders found'}}</h3>
+      <p>{{orders.length === 0 ? 'Start shopping to see your orders here!' : 'Try adjusting your filters'}}</p>
+      <button class="btn btn-primary" (click)="routes('/products')">
+        Start Shopping
+      </button>
+    </div>
+
+    <!-- Orders List -->
+    <div *ngIf="!loading && filteredOrders.length > 0" class="orders-list">
+      <div *ngFor="let order of filteredOrders" class="order-card">
+        <!-- Order Header -->
+        <div class="order-header">
+          <div class="order-info">
+            <div class="order-number">
+              <span class="label">Order #</span>
+              <span class="value">{{order.id}}</span>
+            </div>
+            <div class="order-date">
+              <span class="label">Placed on</span>
+              <span class="value">{{formatDate(order.orderDate)}}</span>
+            </div>
+            <div class="order-total">
+              <span class="label">Total</span>
+              <span class="value">{{formatCurrency(order.total)}}</span>
+            </div>
+          </div>
+          
+          <div class="order-status">
+            <span class="status-badge" [class]="getStatusClass(order.status)">
+              <i [class]="getStatusIcon(order.status)"></i>
+              {{order.status}}
+            </span>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="order-items">
+          <div *ngFor="let item of order.items; let isLast = last" class="order-item" [class]="!isLast ? 'border-bottom' : ''">
+            <img [src]="item.image" [alt]="item.name" class="item-image">
+            <div class="item-details">
+              <div class="item-name">{{item.name}}</div>
+              <div class="item-quantity">Quantity: {{item.quantity}}</div>
+            </div>
+            <div class="item-price">{{formatCurrency(item.price * item.quantity)}}</div>
+          </div>
+        </div>
+
+        <!-- Order Actions -->
+        <div class="order-actions">
+          <button class="btn btn-outline view-details" (click)="viewOrderDetails(order.id)">
+            <i class="fas fa-eye"></i> View Details
+          </button>
+          
+          <button class="btn btn-outline track-order" (click)="trackOrder(order.id)">
+            <i class="fas fa-map-marker-alt"></i> Track Order
+          </button>
+          
+          <button class="btn btn-outline download-invoice" (click)="downloadInvoice(order.id)">
+            <i class="fas fa-download"></i> Invoice
+          </button>
+          
+          <button class="btn btn-primary reorder" (click)="reorderItems(order)">
+            <i class="fas fa-redo"></i> Reorder
+          </button>
+          
+          <!-- Conditional Actions -->
+          <button class="btn btn-danger cancel-order" 
+                  (click)="cancelOrder(order.id)"
+                  *ngIf="order.status === 'Pending' || order.status === 'Confirmed'">
+            <i class="fas fa-times"></i> Cancel
+          </button>
+          
+          <button class="btn btn-outline return-order" 
+                  (click)="returnOrder(order.id)"
+                  *ngIf="order.status === 'Delivered'">
+            <i class="fas fa-undo"></i> Return
+          </button>
+        </div>
+
+        <!-- Delivery Info -->
+        <div class="delivery-info" *ngIf="order.status !== 'Cancelled'">
+          <div class="delivery-address">
+            <i class="fas fa-map-marker-alt"></i>
+            <div class="address-text">
+              <div class="address-name">{{order.shippingAddress.name}}</div>
+              <div class="address-details">
+                {{order.shippingAddress.street}}, {{order.shippingAddress.city}}, 
+                {{order.shippingAddress.state}} {{order.shippingAddress.zipCode}}
+              </div>
+            </div>
+          </div>
+          
+          <div class="delivery-date" *ngIf="order.status !== 'Pending'">
+            <i class="fas fa-truck"></i>
+            <div>
+              <div class="date-label">Expected Delivery</div>
+              <div class="date-value">{{formatDate(order.deliveryDate)}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pagination (if needed) -->
+    <div class="pagination" *ngIf="filteredOrders.length > 10">
+      <button class="btn btn-outline" disabled>
+        <i class="fas fa-chevron-left"></i> Previous
+      </button>
+      <span class="page-info">Showing 1-10 of {{filteredOrders.length}} orders</span>
+      <button class="btn btn-outline">
+        Next <i class="fas fa-chevron-right"></i>
+      </button>
+    </div>
+  </div>
+</div>

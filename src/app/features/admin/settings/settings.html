@@ -1,0 +1,331 @@
+<div class="admin-settings">
+  <!-- Shared Sidebar -->
+  <app-admin-sidebar 
+    [sidebarCollapsed]="sidebarCollapsed" 
+    [pendingOrders]="0"
+    (sidebarToggle)="toggleSidebar()">
+  </app-admin-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="page-title">Settings</h1>
+        <nav class="breadcrumb">
+          <span>Home</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Settings</span>
+        </nav>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-secondary" (click)="exportSettings()">
+          <i class="fas fa-download"></i>
+          Export
+        </button>
+        <button class="btn btn-secondary" (click)="importSettings()">
+          <i class="fas fa-upload"></i>
+          Import
+        </button>
+      </div>
+    </header>
+
+    <!-- Settings Content -->
+    <div class="settings-content">
+      <!-- Success Message -->
+      <div class="success-message" [class.show]="saveSuccess">
+        <i class="fas fa-check-circle"></i>
+        <span>Settings saved successfully!</span>
+      </div>
+
+      <!-- Settings Tabs -->
+      <div class="settings-tabs">
+        <button class="tab-btn" [class.active]="activeTab === 'user'" (click)="switchTab('user')">
+          <i class="fas fa-user"></i>
+          User Settings
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'store'" (click)="switchTab('store')">
+          <i class="fas fa-store"></i>
+          Store Settings
+        </button>
+        <button class="tab-btn" [class.active]="activeTab === 'system'" (click)="switchTab('system')">
+          <i class="fas fa-cog"></i>
+          System Settings
+        </button>
+      </div>
+
+      <!-- User Settings Tab -->
+      <div class="settings-tab" [class.active]="activeTab === 'user'">
+        <div class="settings-section">
+          <div class="section-header">
+            <h2>User Profile</h2>
+            <p>Manage your personal account settings and preferences</p>
+          </div>
+          
+          <form class="settings-form" [formGroup]="userSettingsForm" (ngSubmit)="saveUserSettings()">
+            <div class="form-grid">
+              <div class="form-group">
+                <label for="firstName">First Name *</label>
+                <input id="firstName" type="text" formControlName="firstName" class="form-control" required>
+                <div class="error-message" *ngIf="userSettingsForm.get('firstName')?.invalid && userSettingsForm.get('firstName')?.touched">
+                  First name is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="lastName">Last Name *</label>
+                <input id="lastName" type="text" formControlName="lastName" class="form-control" required>
+                <div class="error-message" *ngIf="userSettingsForm.get('lastName')?.invalid && userSettingsForm.get('lastName')?.touched">
+                  Last name is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="email">Email Address *</label>
+                <input id="email" type="email" formControlName="email" class="form-control" required>
+                <div class="error-message" *ngIf="userSettingsForm.get('email')?.invalid && userSettingsForm.get('email')?.touched">
+                  Valid email is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="phone">Phone Number *</label>
+                <input id="phone" type="tel" formControlName="phone" class="form-control" required>
+                <div class="error-message" *ngIf="userSettingsForm.get('phone')?.invalid && userSettingsForm.get('phone')?.touched">
+                  Phone number is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="timezone">Timezone *</label>
+                <select id="timezone" formControlName="timezone" class="form-control" required>
+                  <option *ngFor="let tz of timezones" [value]="tz.value">{{tz.label}}</option>
+                </select>
+              </div>
+              
+              <div class="form-group">
+                <label for="language">Language *</label>
+                <select id="language" formControlName="language" class="form-control" required>
+                  <option *ngFor="let lang of languages" [value]="lang.value">{{lang.label}}</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h3>Notifications</h3>
+              <div class="checkbox-group">
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="emailNotifications">
+                  <span class="checkmark"></span>
+                  Email Notifications
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="pushNotifications">
+                  <span class="checkmark"></span>
+                  Push Notifications
+                </label>
+                <label class="checkbox-label">
+                  <input type="checkbox" formControlName="twoFactorEnabled">
+                  <span class="checkmark"></span>
+                  Enable Two-Factor Authentication
+                </label>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="resetForm('user')">Reset</button>
+              <button type="submit" class="btn btn-primary" [disabled]="userSettingsForm.invalid || saving">
+                <i class="fas fa-save"></i>
+                {{saving ? 'Saving...' : 'Save Changes'}}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- Store Settings Tab -->
+      <div class="settings-tab" [class.active]="activeTab === 'store'">
+        <div class="settings-section">
+          <div class="section-header">
+            <h2>Store Configuration</h2>
+            <p>Configure your store's basic information and settings</p>
+          </div>
+          
+          <form class="settings-form" [formGroup]="storeSettingsForm" (ngSubmit)="saveStoreSettings()">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <label for="storeName">Store Name *</label>
+                <input id="storeName" type="text" formControlName="storeName" class="form-control" required>
+                <div class="error-message" *ngIf="storeSettingsForm.get('storeName')?.invalid && storeSettingsForm.get('storeName')?.touched">
+                  Store name is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="storeEmail">Store Email *</label>
+                <input id="storeEmail" type="email" formControlName="storeEmail" class="form-control" required>
+                <div class="error-message" *ngIf="storeSettingsForm.get('storeEmail')?.invalid && storeSettingsForm.get('storeEmail')?.touched">
+                  Valid email is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="storePhone">Store Phone *</label>
+                <input id="storePhone" type="tel" formControlName="storePhone" class="form-control" required>
+                <div class="error-message" *ngIf="storeSettingsForm.get('storePhone')?.invalid && storeSettingsForm.get('storePhone')?.touched">
+                  Phone number is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="currency">Currency *</label>
+                <select id="currency" formControlName="currency" class="form-control" required>
+                  <option *ngFor="let currency of currencies" [value]="currency.value">{{currency.label}}</option>
+                </select>
+              </div>
+              
+              <div class="form-group full-width">
+                <label for="address">Address *</label>
+                <input id="address" type="text" formControlName="address" class="form-control" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="city">City *</label>
+                <input id="city" type="text" formControlName="city" class="form-control" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="state">State *</label>
+                <input id="state" type="text" formControlName="state" class="form-control" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="zipCode">Zip Code *</label>
+                <input id="zipCode" type="text" formControlName="zipCode" class="form-control" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="country">Country *</label>
+                <input id="country" type="text" formControlName="country" class="form-control" required>
+              </div>
+              
+              <div class="form-group">
+                <label for="taxRate">Tax Rate (%) *</label>
+                <input id="taxRate" type="number" formControlName="taxRate" class="form-control" step="0.1" min="0" max="100" required>
+                <div class="error-message" *ngIf="storeSettingsForm.get('taxRate')?.invalid && storeSettingsForm.get('taxRate')?.touched">
+                  Valid tax rate (0-100) is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="shippingCost">Default Shipping Cost ($) *</label>
+                <input id="shippingCost" type="number" formControlName="shippingCost" class="form-control" step="0.01" min="0" required>
+                <div class="error-message" *ngIf="storeSettingsForm.get('shippingCost')?.invalid && storeSettingsForm.get('shippingCost')?.touched">
+                  Valid shipping cost is required
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="resetForm('store')">Reset</button>
+              <button type="submit" class="btn btn-primary" [disabled]="storeSettingsForm.invalid || saving">
+                <i class="fas fa-save"></i>
+                {{saving ? 'Saving...' : 'Save Changes'}}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      <!-- System Settings Tab -->
+      <div class="settings-tab" [class.active]="activeTab === 'system'">
+        <div class="settings-section">
+          <div class="section-header">
+            <h2>System Configuration</h2>
+            <p>Manage system-wide settings and preferences</p>
+          </div>
+          
+          <form class="settings-form" [formGroup]="systemSettingsForm" (ngSubmit)="saveSystemSettings()">
+            <div class="form-grid">
+              <div class="form-group full-width">
+                <h3>General Settings</h3>
+                <div class="checkbox-group">
+                  <label class="checkbox-label">
+                    <input type="checkbox" formControlName="maintenanceMode">
+                    <span class="checkmark"></span>
+                    Maintenance Mode
+                    <small class="checkbox-description">Temporarily disable the store for maintenance</small>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" formControlName="debugMode">
+                    <span class="checkmark"></span>
+                    Debug Mode
+                    <small class="checkbox-description">Enable debug logging and error reporting</small>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" formControlName="enableRegistration">
+                    <span class="checkmark"></span>
+                    Enable User Registration
+                    <small class="checkbox-description">Allow new users to register accounts</small>
+                  </label>
+                  <label class="checkbox-label">
+                    <input type="checkbox" formControlName="enableGuestCheckout">
+                    <span class="checkmark"></span>
+                    Enable Guest Checkout
+                    <small class="checkbox-description">Allow customers to checkout without registration</small>
+                  </label>
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="sessionTimeout">Session Timeout (minutes) *</label>
+                <input id="sessionTimeout" type="number" formControlName="sessionTimeout" class="form-control" min="1" max="120" required>
+                <div class="error-message" *ngIf="systemSettingsForm.get('sessionTimeout')?.invalid && systemSettingsForm.get('sessionTimeout')?.touched">
+                  Valid timeout (1-120 minutes) is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="maxFileSize">Max File Size (MB) *</label>
+                <input id="maxFileSize" type="number" formControlName="maxFileSize" class="form-control" min="1" max="100" required>
+                <div class="error-message" *ngIf="systemSettingsForm.get('maxFileSize')?.invalid && systemSettingsForm.get('maxFileSize')?.touched">
+                  Valid file size (1-100 MB) is required
+                </div>
+              </div>
+              
+              <div class="form-group">
+                <label for="backupFrequency">Backup Frequency *</label>
+                <select id="backupFrequency" formControlName="backupFrequency" class="form-control" required>
+                  <option *ngFor="let freq of backupFrequencies" [value]="freq.value">{{freq.label}}</option>
+                </select>
+              </div>
+            </div>
+            
+            <div class="form-section">
+              <h3>System Actions</h3>
+              <div class="action-buttons">
+                <button type="button" class="btn btn-secondary" (click)="clearCache()">
+                  <i class="fas fa-broom"></i>
+                  Clear Cache
+                </button>
+                <button type="button" class="btn btn-secondary" (click)="runBackup()">
+                  <i class="fas fa-database"></i>
+                  Run Backup Now
+                </button>
+              </div>
+            </div>
+            
+            <div class="form-actions">
+              <button type="button" class="btn btn-secondary" (click)="resetForm('system')">Reset</button>
+              <button type="submit" class="btn btn-primary" [disabled]="systemSettingsForm.invalid || saving">
+                <i class="fas fa-save"></i>
+                {{saving ? 'Saving...' : 'Save Changes'}}
+              </button>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

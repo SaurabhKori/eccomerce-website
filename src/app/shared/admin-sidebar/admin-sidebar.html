@@ -1,0 +1,59 @@
+<aside class="sidebar" [class.sidebar-collapsed]="sidebarCollapsed">
+  <div class="sidebar-header">
+    <div class="logo">
+      <i class="fas fa-store"></i>
+      <span *ngIf="!sidebarCollapsed">E-Commerce Admin</span>
+    </div>
+    <button class="toggle-sidebar" (click)="sidebarToggle.emit()">
+      <i class="fas" [class.fa-bars]="!sidebarCollapsed" [class.fa-times]="sidebarCollapsed"></i>
+    </button>
+  </div>
+  
+  <nav class="sidebar-nav">
+    <ul class="nav-list">
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="isActiveRoute('/admin')" routerLink="/admin">
+          <i class="fas fa-tachometer-alt"></i>
+          <span *ngIf="!sidebarCollapsed">Dashboard</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="isActiveRoute('/admin/products')" routerLink="/admin/products">
+          <i class="fas fa-box"></i>
+          <span *ngIf="!sidebarCollapsed">Products</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="isActiveRoute('/admin/orders')" routerLink="/admin/orders">
+          <i class="fas fa-shopping-cart"></i>
+          <span *ngIf="!sidebarCollapsed">Orders</span>
+          <span class="badge" *ngIf="!sidebarCollapsed && pendingOrders > 0">{{pendingOrders}}</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="isActiveRoute('/admin/customers')" routerLink="/admin/customers">
+          <i class="fas fa-users"></i>
+          <span *ngIf="!sidebarCollapsed">Customers</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="isActiveRoute('/admin/categories')" routerLink="/admin/categories">
+          <i class="fas fa-tags"></i>
+          <span *ngIf="!sidebarCollapsed">Categories</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="isActiveRoute('/admin/analytics')" routerLink="/admin/analytics">
+          <i class="fas fa-chart-line"></i>
+          <span *ngIf="!sidebarCollapsed">Analytics</span>
+        </a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" [class.active]="isActiveRoute('/admin/settings')" routerLink="/admin/settings">
+          <i class="fas fa-cog"></i>
+          <span *ngIf="!sidebarCollapsed">Settings</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</aside>

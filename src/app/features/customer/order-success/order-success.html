@@ -1,0 +1,132 @@
+<div class="order-success-page">
+  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
+  
+  <div class="order-success-main" [class.sidebar-collapsed]="sidebarCollapsed">
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading order details...</p>
+    </div>
+
+    <div *ngIf="!loading && orderDetails" class="success-content">
+      <!-- Success Header -->
+      <div class="success-header">
+        <div class="success-icon">
+          <i class="fas fa-check-circle"></i>
+        </div>
+        <h1>Order Placed Successfully!</h1>
+        <p>Thank you for your purchase. Your order has been confirmed.</p>
+      </div>
+
+      <!-- Order Details Card -->
+      <div class="order-details-card">
+        <div class="order-info">
+          <div class="order-number">
+            <h3>Order Number</h3>
+            <div class="order-id">{{orderDetails.id}}</div>
+          </div>
+          
+          <div class="order-dates">
+            <div class="date-item">
+              <i class="fas fa-calendar"></i>
+              <div>
+                <div class="date-label">Order Date</div>
+                <div class="date-value">{{formatDate(orderDetails.orderDate)}}</div>
+              </div>
+            </div>
+            <div class="date-item">
+              <i class="fas fa-truck"></i>
+              <div>
+                <div class="date-label">Expected Delivery</div>
+                <div class="date-value">{{formatDate(orderDetails.deliveryDate)}}</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-status">
+          <span class="status-badge confirmed">{{orderDetails.status}}</span>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="order-items-section">
+        <h3>Order Items</h3>
+        <div class="order-items">
+          <div *ngFor="let item of orderDetails.items" class="order-item">
+            <img [src]="item.image" [alt]="item.name" class="item-image">
+            <div class="item-details">
+              <div class="item-name">{{item.name}}</div>
+              <div class="item-quantity">Quantity: {{item.quantity}}</div>
+            </div>
+            <div class="item-price">{{formatCurrency(item.price * item.quantity)}}</div>
+          </div>
+        </div>
+        
+        <div class="order-total">
+          <div class="total-row">
+            <span>Total Amount</span>
+            <span class="total-amount">{{formatCurrency(orderDetails.total)}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Address -->
+      <div class="shipping-address-section">
+        <h3>Shipping Address</h3>
+        <div class="address-card">
+          <div class="address-info">
+            <div class="address-name">{{orderDetails.shippingAddress.name}}</div>
+            <div class="address-street">{{orderDetails.shippingAddress.street}}</div>
+            <div class="address-city">
+              {{orderDetails.shippingAddress.city}}, {{orderDetails.shippingAddress.state}} {{orderDetails.shippingAddress.zipCode}}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-primary track-order" (click)="trackOrder()">
+          <i class="fas fa-map-marker-alt"></i> Track Order
+        </button>
+        <button class="btn btn-outline view-orders" (click)="viewOrderHistory()">
+          <i class="fas fa-list"></i> View Order History
+        </button>
+        <button class="btn btn-outline download-invoice" (click)="downloadInvoice()">
+          <i class="fas fa-download"></i> Download Invoice
+        </button>
+        <button class="btn btn-outline share-order" (click)="shareOrder()">
+          <i class="fas fa-share"></i> Share Order
+        </button>
+      </div>
+
+      <!-- Continue Shopping -->
+      <div class="continue-shopping">
+        <p>Need more items?</p>
+        <button class="btn btn-primary btn-large" (click)="continueShopping()">
+          <i class="fas fa-shopping-bag"></i> Continue Shopping
+        </button>
+      </div>
+
+      <!-- Additional Info -->
+      <div class="additional-info">
+        <div class="info-card">
+          <i class="fas fa-envelope"></i>
+          <div class="info-content">
+            <h4>Order Confirmation Email</h4>
+            <p>We've sent a confirmation email with all your order details. Please check your inbox.</p>
+          </div>
+        </div>
+        
+        <div class="info-card">
+          <i class="fas fa-headset"></i>
+          <div class="info-content">
+            <h4>Need Help?</h4>
+            <p>Our customer support team is available 24/7 to assist you with any questions.</p>
+            <a href="/contact" class="support-link">Contact Support</a>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

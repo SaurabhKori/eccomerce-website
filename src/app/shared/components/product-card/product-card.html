@@ -1,0 +1,46 @@
+<div class="product-card" [class.compact]="compact" (click)="onProductClick()">
+  <div class="product-image">
+    <img [src]="product.image" [alt]="product.name">
+    <div class="product-badges">
+      <span class="badge badge-featured" *ngIf="product.featured">Featured</span>
+      <span class="badge badge-discount" *ngIf="product.discount">
+        -{{getDiscountPercentage()}}%
+      </span>
+      <span class="badge badge-top-rated" *ngIf="product.topRated">Top Rated</span>
+    </div>
+    <div class="product-actions" *ngIf="showActions">
+      <button class="action-btn wishlist" (click)="onAddToWishlist($event)">
+        <i class="far fa-heart"></i>
+      </button>
+      <button class="action-btn quick-view" (click)="onQuickView($event)">
+        <i class="fas fa-eye"></i>
+      </button>
+    </div>
+  </div>
+  
+  <div class="product-info">
+    <h3 class="product-name">{{product.name}}</h3>
+    <div class="product-rating">
+      <div class="stars">
+        <i class="fas fa-star" *ngFor="let star of getRatingStars(product.rating)"></i>
+        <i class="far fa-star" *ngFor="let star of createArray(5 - product.rating)"></i>
+      </div>
+      <span class="rating-count">({{product.reviews}})</span>
+    </div>
+    <div class="product-price">
+      <span class="current-price">{{formatCurrency(product.price)}}</span>
+      <span class="original-price" *ngIf="product.originalPrice">
+        {{formatCurrency(product.originalPrice)}}
+      </span>
+    </div>
+    <div class="product-brand" *ngIf="!compact">
+      <span class="brand-name">{{product.brand}}</span>
+    </div>
+  </div>
+  
+  <div class="product-footer" *ngIf="showActions && !compact">
+    <button class="btn btn-primary add-to-cart" (click)="onAddToCart($event)">
+      <i class="fas fa-shopping-cart"></i> Add to Cart
+    </button>
+  </div>
+</div>

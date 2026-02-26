@@ -1,0 +1,294 @@
+<div class="seller-dashboard">
+  <!-- Shared Sidebar -->
+  <app-sidebar 
+    [collapsed]="sidebarCollapsed" 
+    [navItems]="navItems"
+    (toggle)="toggleSidebar()">
+  </app-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="page-title">Seller Dashboard</h1>
+        <nav class="breadcrumb">
+          <span>Home</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Dashboard</span>
+        </nav>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-secondary" (click)="refreshData()" [disabled]="loading">
+          <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+          Refresh
+        </button>
+        
+        <!-- Notifications -->
+        <div class="notifications" [class.show]="showNotifications">
+          <button class="notifications-btn" (click)="toggleNotifications()">
+            <i class="fas fa-bell"></i>
+            <span class="badge" *ngIf="unreadNotifications > 0">{{unreadNotifications}}</span>
+          </button>
+          
+          <div class="notifications-dropdown">
+            <div class="notifications-header">
+              <h3>Notifications</h3>
+              <span class="mark-all-read" (click)="unreadNotifications = 0">Mark all as read</span>
+            </div>
+            <div class="notifications-list">
+              <div *ngFor="let notification of notifications" 
+                   class="notification-item" 
+                   [class.unread]="!notification.read"
+                   (click)="markNotificationAsRead(notification.id)">
+                <div class="notification-icon">
+                  <i class="fas" 
+                     [class.fa-shopping-cart]="notification.type === 'order'"
+                     [class.fa-exclamation-triangle]="notification.type === 'inventory'"
+                     [class.fa-star]="notification.type === 'review'"></i>
+                </div>
+                <div class="notification-content">
+                  <p>{{notification.message}}</p>
+                  <span class="notification-time">{{notification.time}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <!-- User Menu -->
+        <div class="user-menu" [class.show]="showUserMenu">
+          <button class="user-menu-btn" (click)="toggleUserMenu()">
+            <img src="https://picsum.photos/seed/seller/40/40.jpg" alt="User" class="user-avatar">
+            <i class="fas fa-chevron-down"></i>
+          </button>
+          
+          <div class="user-menu-dropdown">
+            <a href="#" class="menu-item">
+              <i class="fas fa-user"></i>
+              Profile
+            </a>
+            <a href="#" class="menu-item">
+              <i class="fas fa-cog"></i>
+              Settings
+            </a>
+            <div class="menu-divider"></div>
+            <a href="#" class="menu-item">
+              <i class="fas fa-sign-out-alt"></i>
+              Logout
+            </a>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content">
+      <!-- Stats Cards -->
+      <div class="stats-cards">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatCurrency(sellerStats.totalRevenue)}}</h3>
+            <p>Total Revenue</p>
+            <span class="stat-change positive">+12.5%</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatNumber(sellerStats.totalOrders)}}</h3>
+            <p>Total Orders</p>
+            <span class="stat-change positive">+8.3%</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-box"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatNumber(sellerStats.totalProducts)}}</h3>
+            <p>Total Products</p>
+            <span class="stat-change positive">+5.2%</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-chart-line"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatCurrency(sellerStats.avgOrderValue)}}</h3>
+            <p>Avg Order Value</p>
+            <span class="stat-change negative">-2.1%</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-percentage"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{sellerStats.conversionRate}}%</h3>
+            <p>Conversion Rate</p>
+            <span class="stat-change positive">+1.2%</span>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="stat-content">
+            <div class="rating">
+              <span class="rating-stars">
+                <i class="fas fa-star" *ngFor="let star of getRatingStars(sellerStats.customerRating); let i = index" 
+                   [class.fas]="star === 1" [class.far]="star === 0" [class.fa-star-half-alt]="star === 0.5"></i>
+              </span>
+              <span class="rating-value">{{sellerStats.customerRating}}</span>
+            </div>
+            <p>Customer Rating</p>
+            <span class="stat-change positive">+0.3</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Quick Add Product -->
+      <div class="quick-add-section">
+        <div class="section-header">
+          <h2>Quick Add Product</h2>
+          <p>Quickly add a new product to your inventory</p>
+        </div>
+        
+        <form class="quick-add-form" [formGroup]="quickAddForm" (ngSubmit)="quickAddProduct()">
+          <div class="form-row">
+            <div class="form-group">
+              <input type="text" formControlName="productName" class="form-control" placeholder="Product Name" required>
+            </div>
+            <div class="form-group">
+              <input type="number" formControlName="price" class="form-control" placeholder="Price" step="0.01" min="0" required>
+            </div>
+            <div class="form-group">
+              <select formControlName="category" class="form-control" required>
+                <option value="">Select Category</option>
+                <option value="electronics">Electronics</option>
+                <option value="clothing">Clothing</option>
+                <option value="home">Home & Garden</option>
+                <option value="sports">Sports</option>
+              </select>
+            </div>
+            <button type="submit" class="btn btn-primary" [disabled]="quickAddForm.invalid">
+              <i class="fas fa-plus"></i>
+              Add Product
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <!-- Charts and Tables -->
+      <div class="dashboard-grid">
+        <!-- Sales Chart -->
+        <div class="chart-card">
+          <div class="card-header">
+            <h3>Sales Overview</h3>
+            <select class="period-select">
+              <option value="6months">Last 6 Months</option>
+              <option value="1year">Last Year</option>
+            </select>
+          </div>
+          <div class="chart-content">
+            <div class="chart-placeholder">
+              <i class="fas fa-chart-area"></i>
+              <p>Sales chart will be rendered here</p>
+              <div class="mock-chart-data">
+                <div *ngFor="let data of salesData" class="chart-bar">
+                  <div class="bar" [style.height.%]="(data.revenue / 200)"></div>
+                  <span class="bar-label">{{data.month}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Top Products -->
+        <div class="table-card">
+          <div class="card-header">
+            <h3>Top Products</h3>
+            <a href="#" class="view-all">View All</a>
+          </div>
+          <div class="table-content">
+            <div class="product-list">
+              <div *ngFor="let product of topProducts" class="product-item">
+                <div class="product-info">
+                  <img [src]="product.image" [alt]="product.name" class="product-image">
+                  <div class="product-details">
+                    <h4>{{product.name}}</h4>
+                    <span class="product-status" [class]="getStatusClass(product.status)">{{product.status}}</span>
+                  </div>
+                </div>
+                <div class="product-stats">
+                  <div class="stat">
+                    <span class="stat-label">Sales:</span>
+                    <span class="stat-value">{{formatNumber(product.sales)}}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">Revenue:</span>
+                    <span class="stat-value">{{formatCurrency(product.revenue)}}</span>
+                  </div>
+                  <div class="stat">
+                    <span class="stat-label">Stock:</span>
+                    <span class="stat-value" [class]="product.stock <= 5 ? 'low-stock' : ''">{{product.stock}}</span>
+                  </div>
+                </div>
+                <button class="action-btn" (click)="viewProduct(product.id)">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Recent Orders -->
+        <div class="table-card">
+          <div class="card-header">
+            <h3>Recent Orders</h3>
+            <a href="#" class="view-all">View All</a>
+          </div>
+          <div class="table-content">
+            <div class="orders-list">
+              <div *ngFor="let order of recentOrders" class="order-item">
+                <div class="order-info">
+                  <div class="order-header">
+                    <span class="order-id">#{{order.id}}</span>
+                    <span class="order-status" [class]="getStatusClass(order.status)">{{order.status}}</span>
+                  </div>
+                  <div class="customer-info">
+                    <span class="customer-name">{{order.customerName}}</span>
+                    <span class="customer-email">{{order.customerEmail}}</span>
+                  </div>
+                </div>
+                <div class="order-details">
+                  <div class="order-summary">
+                    <span class="product-count">{{order.products}} items</span>
+                    <span class="order-total">{{formatCurrency(order.total)}}</span>
+                  </div>
+                  <span class="order-date">{{order.date | date:'MMM dd, HH:mm'}}</span>
+                </div>
+                <button class="action-btn" (click)="viewOrder(order.id)">
+                  <i class="fas fa-eye"></i>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

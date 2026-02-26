@@ -1,0 +1,62 @@
+<footer class="main-footer">
+  <div class="footer-content">
+    <div class="footer-section">
+      <h3>Shop</h3>
+      <ul class="footer-links">
+        <li><a href="/products">All Products</a></li>
+        <li><a href="/categories">Categories</a></li>
+        <li><a href="/deals">Special Deals</a></li>
+        <li><a href="/brands">Brands</a></li>
+      </ul>
+    </div>
+    
+    <div class="footer-section">
+      <h3>Customer Service</h3>
+      <ul class="footer-links">
+        <li><a href="/contact">Contact Us</a></li>
+        <li><a href="/shipping">Shipping Info</a></li>
+        <li><a href="/returns">Returns</a></li>
+        <li><a href="/faq">FAQ</a></li>
+      </ul>
+    </div>
+    
+    <div class="footer-section">
+      <h3>About</h3>
+      <ul class="footer-links">
+        <li><a href="/about">About Us</a></li>
+        <li><a href="/careers">Careers</a></li>
+        <li><a href="/press">Press</a></li>
+        <li><a href="/sustainability">Sustainability</a></li>
+      </ul>
+    </div>
+    
+    <div class="footer-section">
+      <h3>Connect</h3>
+      <div class="social-links">
+        <a *ngFor="let social of socialLinks" [href]="social.url" class="social-link" [title]="social.name">
+          <i [class]="social.icon"></i>
+        </a>
+      </div>
+      <div class="newsletter">
+        <h4>Subscribe to our newsletter</h4>
+        <div class="newsletter-form">
+          <input type="email" placeholder="Enter your email" class="newsletter-input">
+          <button class="newsletter-btn">Subscribe</button>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <div class="footer-bottom">
+    <div class="footer-copyright">
+      <p>&copy; {{currentYear}} {{companyName}}. All rights reserved.</p>
+    </div>
+    <div class="footer-payments">
+      <span>We accept:</span>
+      <i class="fab fa-cc-visa"></i>
+      <i class="fab fa-cc-mastercard"></i>
+      <i class="fab fa-cc-amex"></i>
+      <i class="fab fa-cc-paypal"></i>
+    </div>
+  </div>
+</footer>

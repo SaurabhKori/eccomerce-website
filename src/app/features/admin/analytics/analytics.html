@@ -1,0 +1,269 @@
+<div class="admin-analytics">
+  <!-- Shared Sidebar -->
+  <app-admin-sidebar 
+    [sidebarCollapsed]="sidebarCollapsed" 
+    [pendingOrders]="0"
+    (sidebarToggle)="toggleSidebar()">
+  </app-admin-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="page-title">Analytics</h1>
+        <nav class="breadcrumb">
+          <span>Home</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Analytics</span>
+        </nav>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-secondary" (click)="refreshData()" [disabled]="loading">
+          <i class="fas fa-sync-alt" [class.fa-spin]="loading"></i>
+          Refresh
+        </button>
+        <button class="btn btn-primary" (click)="exportAnalytics()">
+          <i class="fas fa-download"></i>
+          Export
+        </button>
+      </div>
+    </header>
+
+    <!-- Analytics Content -->
+    <div class="analytics-content">
+      <!-- Filters and Controls -->
+      <div class="controls-section">
+        <div class="controls-left">
+          <select class="period-select" [(ngModel)]="selectedPeriod" (change)="onPeriodChange()">
+            <option value="7days">Last 7 Days</option>
+            <option value="30days">Last 30 Days</option>
+            <option value="90days">Last 90 Days</option>
+            <option value="1year">Last Year</option>
+          </select>
+          
+          <select class="metric-select" [(ngModel)]="selectedMetric" (change)="onMetricChange()">
+            <option value="revenue">Revenue</option>
+            <option value="orders">Orders</option>
+            <option value="customers">Customers</option>
+            <option value="conversion">Conversion Rate</option>
+          </select>
+        </div>
+        
+        <div class="controls-right">
+          <form class="date-range-form" [formGroup]="dateRangeForm" (ngSubmit)="onDateRangeSubmit()">
+            <input type="date" formControlName="startDate" class="date-input" placeholder="Start Date">
+            <input type="date" formControlName="endDate" class="date-input" placeholder="End Date">
+            <button type="submit" class="btn btn-secondary">Apply</button>
+          </form>
+        </div>
+      </div>
+
+      <!-- Summary Cards -->
+      <div class="summary-cards">
+        <div class="summary-card">
+          <div class="card-header">
+            <i class="fas fa-dollar-sign"></i>
+            <h3>Total Revenue</h3>
+          </div>
+          <div class="card-content">
+            <div class="main-value">{{formatCurrency(totalRevenue)}}</div>
+            <div class="growth-indicator" [class]="getGrowthClass(revenueGrowth)">
+              <i class="fas" [class]="getGrowthIcon(revenueGrowth)"></i>
+              <span>{{formatPercentage(revenueGrowth)}}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="card-header">
+            <i class="fas fa-shopping-cart"></i>
+            <h3>Total Orders</h3>
+          </div>
+          <div class="card-content">
+            <div class="main-value">{{formatNumber(totalOrders)}}</div>
+            <div class="growth-indicator" [class]="getGrowthClass(orderGrowth)">
+              <i class="fas" [class]="getGrowthIcon(orderGrowth)"></i>
+              <span>{{formatPercentage(orderGrowth)}}</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="card-header">
+            <i class="fas fa-users"></i>
+            <h3>Total Customers</h3>
+          </div>
+          <div class="card-content">
+            <div class="main-value">{{formatNumber(totalCustomers)}}</div>
+            <div class="growth-indicator positive">
+              <i class="fas fa-arrow-up"></i>
+              <span>+5.2%</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="card-header">
+            <i class="fas fa-chart-line"></i>
+            <h3>Conversion Rate</h3>
+          </div>
+          <div class="card-content">
+            <div class="main-value">{{formatPercentage(conversionRate)}}</div>
+            <div class="growth-indicator positive">
+              <i class="fas fa-arrow-up"></i>
+              <span>+1.2%</span>
+            </div>
+          </div>
+        </div>
+        
+        <div class="summary-card">
+          <div class="card-header">
+            <i class="fas fa-receipt"></i>
+            <h3>Avg Order Value</h3>
+          </div>
+          <div class="card-content">
+            <div class="main-value">{{formatCurrency(avgOrderValue)}}</div>
+            <div class="growth-indicator positive">
+              <i class="fas fa-arrow-up"></i>
+              <span>+3.4%</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Section -->
+      <div class="charts-section">
+        <!-- Sales Chart -->
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3>Sales Overview</h3>
+            <div class="chart-legend">
+              <span class="legend-item">
+                <span class="legend-color revenue"></span>
+                Revenue
+              </span>
+              <span class="legend-item">
+                <span class="legend-color orders"></span>
+                Orders
+              </span>
+            </div>
+          </div>
+          <div class="chart-content">
+            <div class="chart-placeholder">
+              <i class="fas fa-chart-area"></i>
+              <p>Sales chart will be rendered here</p>
+              <div class="mock-chart-data">
+                <div *ngFor="let data of salesData" class="chart-bar">
+                  <div class="bar revenue" [style.height.%]="(data.revenue / 1000)"></div>
+                  <div class="bar orders" [style.height.%]="(data.orders / 3)"></div>
+                  <span class="bar-label">{{data.month}}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Customer Segments -->
+        <div class="chart-container">
+          <div class="chart-header">
+            <h3>Customer Segments</h3>
+          </div>
+          <div class="chart-content">
+            <div class="segments-list">
+              <div *ngFor="let segment of customerSegments" class="segment-item">
+                <div class="segment-info">
+                  <h4>{{segment.segment}}</h4>
+                  <span class="segment-count">{{formatNumber(segment.count)}} customers</span>
+                </div>
+                <div class="segment-stats">
+                  <div class="percentage">{{formatPercentage(segment.percentage)}}</div>
+                  <div class="avg-order">Avg: {{formatCurrency(segment.avgOrderValue)}}</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tables Section -->
+      <div class="tables-section">
+        <!-- Top Products -->
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Top Products</h3>
+          </div>
+          <div class="table-content">
+            <table class="analytics-table">
+              <thead>
+                <tr>
+                  <th>Product</th>
+                  <th>Category</th>
+                  <th>Sales</th>
+                  <th>Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let product of topProducts">
+                  <td>
+                    <div class="product-info">
+                      <span class="product-name">{{product.name}}</span>
+                    </div>
+                  </td>
+                  <td>
+                    <span class="category-badge">{{product.category}}</span>
+                  </td>
+                  <td>
+                    <span class="sales-count">{{formatNumber(product.sales)}}</span>
+                  </td>
+                  <td>
+                    <span class="revenue-amount">{{formatCurrency(product.revenue)}}</span>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Category Performance -->
+        <div class="table-container">
+          <div class="table-header">
+            <h3>Category Performance</h3>
+          </div>
+          <div class="table-content">
+            <table class="analytics-table">
+              <thead>
+                <tr>
+                  <th>Category</th>
+                  <th>Revenue</th>
+                  <th>Orders</th>
+                  <th>Growth</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let category of categoryPerformance">
+                  <td>
+                    <span class="category-name">{{category.category}}</span>
+                  </td>
+                  <td>
+                    <span class="revenue-amount">{{formatCurrency(category.revenue)}}</span>
+                  </td>
+                  <td>
+                    <span class="order-count">{{formatNumber(category.orders)}}</span>
+                  </td>
+                  <td>
+                    <div class="growth-cell" [class]="getGrowthClass(category.growth)">
+                      <i class="fas" [class]="getGrowthIcon(category.growth)"></i>
+                      <span>{{formatPercentage(category.growth)}}</span>
+                    </div>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </main>
+</div>

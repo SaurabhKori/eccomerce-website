@@ -1,0 +1,22 @@
+<aside class="sidebar" [class.sidebar-collapsed]="collapsed">
+  <div class="sidebar-header">
+    <div class="logo">
+      <i class="fas fa-store"></i>
+      <span *ngIf="!collapsed">Seller Portal</span>
+    </div>
+    <button class="toggle-sidebar" (click)="onToggle()">
+      <i class="fas" [class.fa-bars]="!collapsed" [class.fa-times]="collapsed"></i>
+    </button>
+  </div>
+  
+  <nav class="sidebar-nav">
+    <ul class="nav-list">
+      <li class="nav-item" *ngFor="let item of navItems">
+        <a class="nav-link" [class.active]="isActive(item.path)" [routerLink]="item.path">
+          <i [class]="item.icon"></i>
+          <span *ngIf="!collapsed">{{item.label}}</span>
+        </a>
+      </li>
+    </ul>
+  </nav>
+</aside>

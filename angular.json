@@ -23,12 +23,7 @@
             ],
             "styles": [
               "src/styles.css"
-            ],
-            "server": "src/main.server.ts",
-            "outputMode": "server",
-            "ssr": {
-              "entry": "src/server.ts"
-            }
+            ]
           },
           "configurations": {
             "production": {
@@ -44,15 +39,18 @@
                   "maximumError": "8kB"
                 }
               ],
-              "outputHashing": "all"
+              "outputHashing": "all",
+              "optimization": true,
+              "sourceMap": false,
+              "extractLicenses": true
             },
             "development": {
               "optimization": false,
               "extractLicenses": false,
-              "sourceMap": true
+              "sourceMap": false
             }
           },
-          "defaultConfiguration": "production"
+          "defaultConfiguration": "development"
         },
         "serve": {
           "builder": "@angular/build:dev-server",
@@ -86,5 +84,8 @@
         }
       }
     }
+  },
+  "cli": {
+    "analytics": false
   }
 }

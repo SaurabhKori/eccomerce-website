@@ -1,0 +1,220 @@
+<div class="reviews-page">
+  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
+  
+  <div class="reviews-main" [class.sidebar-collapsed]="sidebarCollapsed">
+    <!-- Header -->
+    <div class="reviews-header">
+      <button class="btn btn-outline back-btn" (click)="routes('/products')">
+        <i class="fas fa-arrow-left"></i> Back to Products
+      </button>
+      <h1>{{product ? 'Product Reviews' : 'My Reviews'}}</h1>
+    </div>
+
+    <!-- Product Info (if viewing product reviews) -->
+    <div *ngIf="product" class="product-info-card">
+      <div class="product-details">
+        <img [src]="product.image" [alt]="product.name" class="product-image">
+        <div class="product-info">
+          <h2>{{product.name}}</h2>
+          <div class="rating-summary">
+            <div class="average-rating">
+              <span class="rating-number">{{product.averageRating}}</span>
+              <div class="rating-stars">
+                <i class="fas fa-star" *ngFor="let star of getRatingStars(product.averageRating)"></i>
+                <i class="fas fa-star-half-alt" *ngIf="product.averageRating % 1 !== 0"></i>
+              </div>
+            </div>
+            <div class="total-reviews">{{product.totalReviews}} Reviews</div>
+          </div>
+        </div>
+      </div>
+      
+      <!-- User's Review -->
+      <div *ngIf="product.userReview" class="user-review-section">
+        <h3>Your Review</h3>
+        <div class="user-review">
+          <div class="review-header">
+            <div class="review-rating">
+              <i class="fas fa-star" *ngFor="let star of createArray(product.userReview.rating)"></i>
+              <i class="far fa-star" *ngFor="let star of createArray(5 - product.userReview.rating)"></i>
+            </div>
+            <div class="review-actions">
+              <button class="btn btn-outline" (click)="editReview(product.userReview)">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              <button class="btn btn-danger" (click)="deleteReview(product.userReview.id)">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+          <h4>{{product.userReview.title}}</h4>
+          <p>{{product.userReview.comment}}</p>
+          <div class="review-meta">
+            <span class="review-date">{{formatDate(product.userReview.date)}}</span>
+            <span class="verified-badge">
+              <i class="fas fa-check-circle"></i> Verified Purchase
+            </span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Write Review Button -->
+      <div *ngIf="!product.userReview" class="write-review-section">
+        <button class="btn btn-primary" (click)="showReviewForm = true">
+          <i class="fas fa-pen"></i> Write a Review
+        </button>
+      </div>
+    </div>
+
+    <!-- Review Form -->
+    <div *ngIf="showReviewForm" class="review-form-card">
+      <h3>{{product?.userReview ? 'Edit Your Review' : 'Write a Review'}}</h3>
+      <form [formGroup]="reviewForm" (ngSubmit)="submitReview()">
+        <div class="form-group">
+          <label>Rating *</label>
+          <div class="star-rating">
+            <i *ngFor="let star of [0,1,2,3,4]; let i = index" 
+               class="fas" 
+               [class.fa-star]="i < selectedRating"
+               [class.far-star]="i >= selectedRating"
+               (click)="setRating(i + 1)"></i>
+          </div>
+          <div class="error" *ngIf="reviewForm.get('rating')?.invalid && reviewForm.get('rating')?.touched">
+            Please select a rating
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Review Title *</label>
+          <input type="text" formControlName="title" class="form-control" 
+                 placeholder="Summarize your experience">
+          <div class="error" *ngIf="reviewForm.get('title')?.invalid && reviewForm.get('title')?.touched">
+            Review title is required
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label>Review *</label>
+          <textarea formControlName="comment" class="form-control" rows="5" 
+                    placeholder="Tell us about your experience with the product"></textarea>
+          <div class="error" *ngIf="reviewForm.get('comment')?.invalid && reviewForm.get('comment')?.touched">
+            Review must be at least 10 characters
+          </div>
+        </div>
+        
+        <div class="form-group">
+          <label class="checkbox-label">
+            <input type="checkbox" formControlName="recommend">
+            I would recommend this product
+          </label>
+        </div>
+        
+        <div class="form-actions">
+          <button type="submit" class="btn btn-primary" [disabled]="submittingReview">
+            <i class="fas fa-paper-plane"></i>
+            <span *ngIf="!submittingReview">Submit Review</span>
+            <span *ngIf="submittingReview">
+              <i class="fas fa-spinner fa-spin"></i> Submitting...
+            </span>
+          </button>
+          <button type="button" class="btn btn-outline" (click)="showReviewForm = false">
+            Cancel
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <!-- Filters -->
+    <div *ngIf="!product" class="filters-section">
+      <form [formGroup]="filterForm" class="filters-form">
+        <div class="filter-group">
+          <label>Sort By</label>
+          <select formControlName="sortBy" class="form-control">
+            <option value="recent">Most Recent</option>
+            <option value="helpful">Most Helpful</option>
+            <option value="rating-high">Highest Rating</option>
+            <option value="rating-low">Lowest Rating</option>
+          </select>
+        </div>
+        
+        <div class="filter-group">
+          <label>Filter by Rating</label>
+          <select formControlName="rating" class="form-control">
+            <option value="">All Ratings</option>
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+          </select>
+        </div>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading reviews...</p>
+    </div>
+
+    <!-- Reviews List -->
+    <div *ngIf="!loading && reviews.length > 0" class="reviews-list">
+      <div *ngFor="let review of reviews" class="review-card">
+        <div class="review-header">
+          <div class="review-product" *ngIf="!product">
+            <img [src]="review.productImage" [alt]="review.productName" class="product-thumb">
+            <div class="product-name">{{review.productName}}</div>
+          </div>
+          
+          <div class="review-rating">
+            <i class="fas fa-star" *ngFor="let star of createArray(review.rating)"></i>
+            <i class="far fa-star" *ngFor="let star of createArray(5 - review.rating)"></i>
+          </div>
+          
+          <div class="review-date">{{formatDate(review.date)}}</div>
+        </div>
+        
+        <div class="review-content">
+          <h4>{{review.title}}</h4>
+          <p>{{review.comment}}</p>
+        </div>
+        
+        <div class="review-footer">
+          <div class="review-meta">
+            <span *ngIf="review.verified" class="verified-badge">
+              <i class="fas fa-check-circle"></i> Verified Purchase
+            </span>
+          </div>
+          
+          <div class="review-actions">
+            <button class="btn btn-outline helpful-btn" (click)="markHelpful(review.id)">
+              <i class="fas fa-thumbs-up"></i> Helpful ({{review.helpful}})
+            </button>
+            
+            <div *ngIf="!product && review.verified">
+              <button class="btn btn-outline" (click)="editReview(review)">
+                <i class="fas fa-edit"></i> Edit
+              </button>
+              <button class="btn btn-danger" (click)="deleteReview(review.id)">
+                <i class="fas fa-trash"></i> Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Empty State -->
+    <div *ngIf="!loading && reviews.length === 0" class="empty-reviews">
+      <i class="far fa-star"></i>
+      <h3>{{product ? 'No reviews yet' : 'No reviews written'}}</h3>
+      <p>{{product ? 'Be the first to review this product!' : 'Start reviewing products to see them here!'}}</p>
+      <button *ngIf="product" class="btn btn-primary" (click)="showReviewForm = true">
+        Write First Review
+      </button>
+      <button *ngIf="!product" class="btn btn-primary" (click)="routes('/products')">
+        Browse Products
+      </button>
+    </div>
+  </div>
+</div>

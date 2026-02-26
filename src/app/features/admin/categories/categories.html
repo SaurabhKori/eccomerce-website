@@ -1,0 +1,310 @@
+<div class="admin-categories">
+  <!-- Shared Sidebar -->
+  <app-admin-sidebar 
+    [sidebarCollapsed]="sidebarCollapsed" 
+    [pendingOrders]="0"
+    (sidebarToggle)="toggleSidebar()">
+  </app-admin-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="page-title">Categories</h1>
+        <nav class="breadcrumb">
+          <span>Home</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Categories</span>
+        </nav>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-primary" (click)="openCategoryModal()">
+          <i class="fas fa-plus"></i>
+          Add Category
+        </button>
+        <button class="btn btn-secondary" (click)="exportCategories()">
+          <i class="fas fa-download"></i>
+          Export
+        </button>
+      </div>
+    </header>
+
+    <!-- Categories Content -->
+    <div class="categories-content">
+      <!-- Filters and Search -->
+      <div class="filters-section">
+        <div class="filters-left">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search categories..." (input)="onSearch($event)" [(ngModel)]="searchTerm">
+          </div>
+          
+          <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
+        </div>
+        
+        <div class="filters-right">
+          <div class="view-toggle">
+            <button class="view-btn" [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')">
+              <i class="fas fa-th"></i>
+            </button>
+            <button class="view-btn" [class.active]="viewMode === 'list'" (click)="setViewMode('list')">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+          
+          <div class="stats-summary">
+            <span class="stat-item">
+              <span class="stat-label">Total:</span>
+              <span class="stat-value">{{filteredCategories.length}}</span>
+            </span>
+            <span class="stat-item">
+              <span class="stat-label">Active:</span>
+              <span class="stat-value">{{activeCategoryCount}}</span>
+            </span>
+            <span class="stat-item">
+              <span class="stat-label">Products:</span>
+              <span class="stat-value">{{totalProducts}}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories Grid View -->
+      <div class="categories-grid" *ngIf="viewMode === 'grid'">
+        <div class="category-card" *ngFor="let category of paginatedCategories">
+          <div class="category-image">
+            <img [src]="category.image" [alt]="category.name">
+            <span class="status-badge" [class]="category.status">{{category.status}}</span>
+          </div>
+          
+          <div class="category-content">
+            <h3>{{category.name}}</h3>
+            <p class="category-description">{{category.description}}</p>
+            
+            <div class="category-stats">
+              <div class="stat">
+                <i class="fas fa-box"></i>
+                <span>{{category.productCount}} products</span>
+              </div>
+              <div class="stat">
+                <i class="fas fa-calendar"></i>
+                <span>Created {{category.createdAt | date:'MMM dd, yyyy'}}</span>
+              </div>
+            </div>
+            
+            <div class="category-actions">
+              <button class="action-btn view" (click)="viewCategory(category.id)" title="View Category">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn edit" (click)="editCategory(category.id)" title="Edit Category">
+                <i class="fas fa-edit"></i>
+              </button>
+              <button class="action-btn delete" (click)="deleteCategory(category.id)" title="Delete Category">
+                <i class="fas fa-trash"></i>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Categories List View -->
+      <div class="categories-table-container" *ngIf="viewMode === 'list'">
+        <table class="categories-table">
+          <thead>
+            <tr>
+              <th>Category</th>
+              <th>Description</th>
+              <th>Products</th>
+              <th>Status</th>
+              <th>Created Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let category of paginatedCategories">
+              <td>
+                <div class="category-info-cell">
+                  <img [src]="category.image" [alt]="category.name" class="category-image-small">
+                  <div class="category-details-cell">
+                    <h4>{{category.name}}</h4>
+                    <span class="status-badge" [class]="category.status">{{category.status}}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="category-description-cell">{{category.description}}</span>
+              </td>
+              <td>
+                <div class="products-info">
+                  <span class="product-count">{{category.productCount}}</span>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [class]="category.status">{{category.status}}</span>
+              </td>
+              <td>
+                <span class="created-date">{{category.createdAt | date:'MMM dd, yyyy'}}</span>
+              </td>
+              <td>
+                <div class="table-actions">
+                  <button class="action-btn view" (click)="viewCategory(category.id)" title="View Category">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="action-btn edit" (click)="editCategory(category.id)" title="Edit Category">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="action-btn delete" (click)="deleteCategory(category.id)" title="Delete Category">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <div class="page-numbers">
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="page-number" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{page}}
+          </button>
+        </div>
+        
+        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Category Modal -->
+  <div class="modal-overlay" [class.show]="showCategoryModal" (click)="closeModalOnOverlay($event)">
+    <div class="modal-content category-modal" [class.show]="showCategoryModal">
+      <div class="modal-header">
+        <h2>{{editingCategory ? 'Edit Category' : 'Category Details'}}</h2>
+        <button class="close-btn" (click)="closeCategoryModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="category-form" *ngIf="editingCategory; else categoryDetails">
+        <form [formGroup]="categoryForm" (ngSubmit)="saveCategory()">
+          <div class="form-grid">
+            <div class="form-group full-width">
+              <label for="name">Category Name *</label>
+              <input id="name" type="text" formControlName="name" class="form-control" required>
+              <div class="error-message" *ngIf="categoryForm.get('name')?.invalid && categoryForm.get('name')?.touched">
+                Category name is required
+              </div>
+            </div>
+            
+            <div class="form-group full-width">
+              <label for="description">Description *</label>
+              <textarea id="description" formControlName="description" class="form-control" rows="3" required></textarea>
+              <div class="error-message" *ngIf="categoryForm.get('description')?.invalid && categoryForm.get('description')?.touched">
+                Description is required
+              </div>
+            </div>
+            
+            <div class="form-group full-width">
+              <label for="image">Image URL *</label>
+              <input id="image" type="text" formControlName="image" class="form-control" required>
+              <div class="error-message" *ngIf="categoryForm.get('image')?.invalid && categoryForm.get('image')?.touched">
+                Image URL is required
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="status">Status *</label>
+              <select id="status" formControlName="status" class="form-control" required>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            
+            <div class="form-group">
+              <label for="parentCategory">Parent Category</label>
+              <select id="parentCategory" formControlName="parentCategory" class="form-control">
+                <option value="">None (Root Category)</option>
+                <option *ngFor="let cat of categories" [value]="cat.id" [disabled]="cat.id === editingCategory.id">
+                  {{cat.name}}
+                </option>
+              </select>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeCategoryModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="categoryForm.invalid || saving">
+              <i class="fas fa-save"></i>
+              {{saving ? 'Saving...' : 'Save Category'}}
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <ng-template #categoryDetails>
+        <div class="category-details-view" *ngIf="selectedCategory">
+          <div class="category-overview">
+            <img [src]="selectedCategory.image" [alt]="selectedCategory.name" class="category-image-large">
+            <div class="category-overview-info">
+              <h3>{{selectedCategory.name}}</h3>
+              <span class="status-badge" [class]="selectedCategory.status">{{selectedCategory.status}}</span>
+              <p class="category-description-full">{{selectedCategory.description}}</p>
+            </div>
+          </div>
+          
+          <div class="category-stats-full">
+            <div class="stat-card">
+              <i class="fas fa-box"></i>
+              <div class="stat-info">
+                <span class="stat-number">{{selectedCategory.productCount}}</span>
+                <span class="stat-label">Products</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-calendar"></i>
+              <div class="stat-info">
+                <span class="stat-number">{{selectedCategory.createdAt | date:'MMM yyyy'}}</span>
+                <span class="stat-label">Created</span>
+              </div>
+            </div>
+            <div class="stat-card" *ngIf="selectedCategory.parentCategory">
+              <i class="fas fa-sitemap"></i>
+              <div class="stat-info">
+                <span class="stat-number">{{selectedCategory.parentCategory}}</span>
+                <span class="stat-label">Parent</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeCategoryModal()">Close</button>
+          <button class="btn btn-primary" (click)="editCategory(selectedCategory!.id)">
+            <i class="fas fa-edit"></i>
+            Edit Category
+          </button>
+          <button class="btn btn-secondary" (click)="printCategory()">
+            <i class="fas fa-print"></i>
+            Print
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

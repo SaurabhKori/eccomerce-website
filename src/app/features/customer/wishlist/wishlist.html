@@ -1,0 +1,103 @@
+<div class="wishlist-page">
+  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
+  
+  <div class="wishlist-main" [class.sidebar-collapsed]="sidebarCollapsed">
+    <div class="page-header">
+      <h1>My Wishlist</h1>
+      <div class="header-actions">
+        <button class="btn btn-outline" (click)="routes('/products')">
+          <i class="fas fa-arrow-left"></i>
+          Continue Shopping
+        </button>
+      </div>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading wishlist...</p>
+    </div>
+
+    <div *ngIf="!loading && wishlistItems.length === 0" class="empty-wishlist">
+      <i class="far fa-heart"></i>
+      <h3>Your wishlist is empty</h3>
+      <p>Save items you love for later!</p>
+      <button class="btn btn-primary" (click)="routes('/products')">
+        Start Shopping
+      </button>
+    </div>
+
+    <div *ngIf="!loading && wishlistItems.length > 0" class="wishlist-content">
+      <div class="wishlist-grid">
+        <div *ngFor="let item of wishlistItems" class="wishlist-item">
+          <div class="item-image">
+            <img [src]="item.product.image" [alt]="item.product.name" (click)="viewProduct(item.productId)">
+          </div>
+          
+          <div class="item-details">
+            <h3 class="item-name" (click)="viewProduct(item.productId)">{{item.product.name}}</h3>
+            
+            <div class="item-rating">
+              <i class="fas fa-star" *ngFor="let star of getRatingStars(item.product.rating)"></i>
+              <i class="fas fa-star-half-alt" *ngIf="item.product.rating % 1 !== 0"></i>
+              <span class="rating-text">{{item.product.rating}} ({{item.product.reviews}} reviews)</span>
+            </div>
+            
+            <div class="item-price">
+              <span class="current-price">{{formatCurrency(item.product.price)}}</span>
+              <span *ngIf="item.product.originalPrice" class="original-price">
+                {{formatCurrency(item.product.originalPrice)}}
+              </span>
+              <span *ngIf="item.product.originalPrice" class="discount-badge">
+                -{{getDiscountPercentage(item.product.originalPrice, item.product.price)}}%
+              </span>
+            </div>
+            
+            <div class="item-stock">
+              <span [class]="item.product.stock > 10 ? 'in-stock' : 'low-stock'">
+                {{item.product.stock > 10 ? '✓ In Stock' : `Only ${item.product.stock} left`}}
+              </span>
+            </div>
+          </div>
+          
+          <div class="item-actions">
+            <button class="btn btn-primary add-to-cart" (click)="addToCart(item.productId)">
+              <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
+            <button class="btn btn-outline move-to-cart" (click)="moveToCart(item)">
+              <i class="fas fa-exchange-alt"></i> Move to Cart
+            </button>
+            <button class="btn btn-danger remove" (click)="removeFromWishlist(item.id)">
+              <i class="far fa-trash"></i> Remove
+            </button>
+          </div>
+        </div>
+      </div>
+      
+      <div class="wishlist-summary">
+        <div class="summary-card">
+          <h3>Wishlist Summary</h3>
+          <div class="summary-stats">
+            <div class="stat">
+              <span class="stat-number">{{wishlistItems.length}}</span>
+              <span class="stat-label">Items</span>
+            </div>
+            <div class="stat">
+              <span class="stat-number">
+                {{formatCurrency(getWishlistTotal())}}
+              </span>
+              <span class="stat-label">Total Value</span>
+            </div>
+          </div>
+          <div class="summary-actions">
+            <button class="btn btn-primary" (click)="addAllToCart()">
+              <i class="fas fa-shopping-cart"></i> Add All to Cart
+            </button>
+            <button class="btn btn-outline" (click)="clearWishlist()">
+              <i class="far fa-trash"></i> Clear Wishlist
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,287 @@
+<div class="payment-page">
+  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
+  
+  <div class="payment-main" [class.sidebar-collapsed]="sidebarCollapsed">
+    <!-- Header -->
+    <div class="payment-header">
+      <button class="btn btn-outline back-btn" (click)="cancelPayment()">
+        <i class="fas fa-arrow-left"></i> Cancel
+      </button>
+      <h1>Payment</h1>
+    </div>
+
+    <div class="payment-content">
+      <!-- Order Summary -->
+      <div class="order-summary">
+        <h2>Order Summary</h2>
+        <div class="summary-items">
+          <div class="summary-row">
+            <span>Subtotal</span>
+            <span>{{formatCurrency(orderSummary.subtotal)}}</span>
+          </div>
+          <div class="summary-row">
+            <span>Tax</span>
+            <span>{{formatCurrency(orderSummary.tax)}}</span>
+          </div>
+          <div class="summary-row">
+            <span>Shipping</span>
+            <span *ngIf="orderSummary.shipping === 0">Free</span>
+            <span *ngIf="orderSummary.shipping > 0">{{formatCurrency(orderSummary.shipping)}}</span>
+          </div>
+          <div class="summary-divider"></div>
+          <div class="summary-row total">
+            <span>Total Amount</span>
+            <span>{{formatCurrency(orderSummary.total)}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Methods -->
+      <div class="payment-methods-section">
+        <h2>Select Payment Method</h2>
+        
+        <div class="payment-methods">
+          <div *ngFor="let method of paymentMethods" class="payment-method" 
+               [class.selected]="selectedMethod === method.id"
+               [class.disabled]="!method.enabled"
+               (click)="method.enabled ? selectPaymentMethod(method.id) : null">
+            <div class="method-icon">
+              <i [class]="method.icon"></i>
+            </div>
+            <div class="method-info">
+              <div class="method-name">{{method.name}}</div>
+              <div class="method-desc">{{method.description}}</div>
+            </div>
+            <div class="method-radio">
+              <div class="radio-circle" [class.checked]="selectedMethod === method.id"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Forms -->
+      <div class="payment-forms">
+        <!-- Card Payment -->
+        <div class="payment-form" *ngIf="selectedMethod === 'card'">
+          <h3>Card Details</h3>
+          
+          <!-- Saved Cards -->
+          <div class="saved-cards" *ngIf="showSavedCards">
+            <h4>Saved Cards</h4>
+            <div class="saved-card-list">
+              <div *ngFor="let card of savedCards" class="saved-card" 
+                   (click)="selectSavedCard(card.id)">
+                <div class="card-info">
+                  <div class="card-brand">{{card.brand}}</div>
+                  <div class="card-number">•••• •••• •••• {{card.last4}}</div>
+                  <div class="card-name">{{card.name}}</div>
+                  <div class="card-expiry">Expires {{card.expiry}}</div>
+                </div>
+                <div class="card-select">
+                  <i class="fas fa-check-circle"></i>
+                </div>
+              </div>
+            </div>
+            <button class="btn btn-outline use-new-card" (click)="showSavedCards = false">
+              Use New Card
+            </button>
+          </div>
+
+          <!-- New Card Form -->
+          <form [formGroup]="cardForm" class="card-form">
+            <div class="form-group">
+              <label>Card Number *</label>
+              <input type="text" formControlName="cardNumber" class="form-control" 
+                     placeholder="1234 5678 9012 3456" maxlength="19">
+              <div class="error" *ngIf="cardForm.get('cardNumber')?.invalid && cardForm.get('cardNumber')?.touched">
+                Valid card number is required
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label>Cardholder Name *</label>
+              <input type="text" formControlName="cardName" class="form-control" 
+                     placeholder="John Doe">
+              <div class="error" *ngIf="cardForm.get('cardName')?.invalid && cardForm.get('cardName')?.touched">
+                Cardholder name is required
+              </div>
+            </div>
+            
+            <div class="form-row">
+              <div class="form-group">
+                <label>Expiry Date *</label>
+                <input type="text" formControlName="expiryDate" class="form-control" 
+                       placeholder="MM/YY" maxlength="5">
+                <div class="error" *ngIf="cardForm.get('expiryDate')?.invalid && cardForm.get('expiryDate')?.touched">
+                  Valid expiry date is required
+                </div>
+              </div>
+              <div class="form-group">
+                <label>CVV *</label>
+                <input type="text" formControlName="cvv" class="form-control" 
+                       placeholder="123" maxlength="4">
+                <div class="error" *ngIf="cardForm.get('cvv')?.invalid && cardForm.get('cvv')?.touched">
+                  Valid CVV is required
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="saveCard">
+                Save this card for future payments
+              </label>
+            </div>
+          </form>
+        </div>
+
+        <!-- UPI Payment -->
+        <div class="payment-form" *ngIf="selectedMethod === 'upi'">
+          <h3>UPI Payment</h3>
+          <form [formGroup]="upiForm">
+            <div class="form-group">
+              <label>UPI ID *</label>
+              <input type="text" formControlName="upiId" class="form-control" 
+                     placeholder="yourname@upi">
+              <div class="error" *ngIf="upiForm.get('upiId')?.invalid && upiForm.get('upiId')?.touched">
+                Valid UPI ID is required
+              </div>
+            </div>
+            
+            <div class="upi-apps">
+              <h4>Popular UPI Apps</h4>
+              <div class="app-grid">
+                <div class="app-item">
+                  <i class="fab fa-google-pay"></i>
+                  <span>Google Pay</span>
+                </div>
+                <div class="app-item">
+                  <i class="fab fa-amazon-pay"></i>
+                  <span>PhonePe</span>
+                </div>
+                <div class="app-item">
+                  <i class="fab fa-apple-pay"></i>
+                  <span>Paytm</span>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="saveUpi">
+                Save this UPI ID for future payments
+              </label>
+            </div>
+          </form>
+        </div>
+
+        <!-- Net Banking -->
+        <div class="payment-form" *ngIf="selectedMethod === 'netbanking'">
+          <h3>Net Banking</h3>
+          <form [formGroup]="netBankingForm">
+            <div class="form-group">
+              <label>Select Bank *</label>
+              <select formControlName="bank" class="form-control">
+                <option value="">-- Select Bank --</option>
+                <option value="sbi">State Bank of India</option>
+                <option value="hdfc">HDFC Bank</option>
+                <option value="icici">ICICI Bank</option>
+                <option value="pnb">Punjab National Bank</option>
+                <option value="axis">Axis Bank</option>
+                <option value="kotak">Kotak Mahindra Bank</option>
+              </select>
+              <div class="error" *ngIf="netBankingForm.get('bank')?.invalid && netBankingForm.get('bank')?.touched">
+                Please select a bank
+              </div>
+            </div>
+            
+            <div class="bank-info">
+              <div class="info-card">
+                <i class="fas fa-shield-alt"></i>
+                <div class="info-content">
+                  <h4>Secure Payment</h4>
+                  <p>You will be redirected to your bank's secure payment gateway</p>
+                </div>
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label class="checkbox-label">
+                <input type="checkbox" formControlName="saveBank">
+                Save this bank for future payments
+              </label>
+            </div>
+          </form>
+        </div>
+
+        <!-- Mobile Wallet -->
+        <div class="payment-form" *ngIf="selectedMethod === 'wallet'">
+          <h3>Mobile Wallet</h3>
+          <div class="wallet-options">
+            <div class="wallet-item">
+              <div class="wallet-logo">
+                <i class="fab fa-google-pay"></i>
+              </div>
+              <div class="wallet-name">Google Pay</div>
+            </div>
+            <div class="wallet-item">
+              <div class="wallet-logo">
+                <i class="fab fa-amazon-pay"></i>
+              </div>
+              <div class="wallet-name">PhonePe</div>
+            </div>
+            <div class="wallet-item">
+              <div class="wallet-logo">
+                <i class="fab fa-apple-pay"></i>
+              </div>
+              <div class="wallet-name">Paytm</div>
+            </div>
+            <div class="wallet-item">
+              <div class="wallet-logo">
+                <i class="fab fa-amazon"></i>
+              </div>
+              <div class="wallet-name">Amazon Pay</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Cash on Delivery -->
+        <div class="payment-form" *ngIf="selectedMethod === 'cod'">
+          <h3>Cash on Delivery</h3>
+          <div class="cod-info">
+            <div class="info-card">
+              <i class="fas fa-money-bill-wave"></i>
+              <div class="info-content">
+                <h4>Pay When You Receive</h4>
+                <p>Please keep the exact amount ready at the time of delivery.</p>
+                <ul>
+                  <li>Cash payment accepted</li>
+                  <li>No additional charges</li>
+                  <li>Get receipt upon delivery</li>
+                </ul>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Payment Action -->
+      <div class="payment-action">
+        <button class="btn btn-primary btn-large pay-btn" 
+                (click)="processPayment()"
+                [disabled]="processing">
+          <i class="fas fa-lock"></i>
+          <span *ngIf="!processing">Pay {{formatCurrency(orderSummary.total)}}</span>
+          <span *ngIf="processing">
+            <i class="fas fa-spinner fa-spin"></i> Processing...
+          </span>
+        </button>
+        
+        <div class="security-notice">
+          <i class="fas fa-shield-alt"></i>
+          <span>Your payment information is secure and encrypted</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

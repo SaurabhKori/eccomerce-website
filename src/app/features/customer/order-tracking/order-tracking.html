@@ -1,0 +1,149 @@
+<div class="order-tracking-page">
+  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
+  
+  <div class="tracking-main" [class.sidebar-collapsed]="sidebarCollapsed">
+    <!-- Header -->
+    <div class="tracking-header">
+      <button class="btn btn-outline back-btn" (click)="goBack()">
+        <i class="fas fa-arrow-left"></i> Back to Orders
+      </button>
+      <h1>Order Tracking</h1>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading tracking information...</p>
+    </div>
+
+    <div *ngIf="!loading && orderDetails" class="tracking-content">
+      <!-- Order Info Card -->
+      <div class="order-info-card">
+        <div class="order-header">
+          <div class="order-number">
+            <h3>Order #{{orderDetails.id}}</h3>
+            <span class="status-badge status-shipped">{{orderDetails.status}}</span>
+          </div>
+          <div class="tracking-number">
+            <i class="fas fa-barcode"></i>
+            <div>
+              <div class="label">Tracking Number</div>
+              <div class="value">{{orderDetails.trackingNumber}}</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="order-details">
+          <div class="detail-item">
+            <i class="fas fa-truck"></i>
+            <div>
+              <div class="label">Courier</div>
+              <div class="value">{{orderDetails.courier}}</div>
+            </div>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-map-marker-alt"></i>
+            <div>
+              <div class="label">Current Location</div>
+              <div class="value">{{orderDetails.currentLocation}}</div>
+            </div>
+          </div>
+          <div class="detail-item">
+            <i class="fas fa-calendar"></i>
+            <div>
+              <div class="label">Estimated Delivery</div>
+              <div class="value">{{formatDate(orderDetails.estimatedDelivery)}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tracking Timeline -->
+      <div class="tracking-timeline">
+        <h2>Tracking History</h2>
+        <div class="timeline">
+          <div *ngFor="let step of trackingSteps; let i = index" class="timeline-item" 
+               [class.completed]="step.completed" [class.current]="step.current">
+            <div class="timeline-marker">
+              <div class="marker-dot"></div>
+              <div class="marker-line" *ngIf="i < trackingSteps.length - 1"></div>
+            </div>
+            <div class="timeline-content">
+              <div class="timeline-header">
+                <h3>{{step.title}}</h3>
+                <div class="timeline-date">
+                  <span class="date">{{formatDate(step.date)}}</span>
+                  <span class="time">{{formatTime(step.time)}}</span>
+                </div>
+              </div>
+              <p class="timeline-description">{{step.description}}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Order Items -->
+      <div class="order-items-section">
+        <h2>Order Items</h2>
+        <div class="order-items">
+          <div *ngFor="let item of orderDetails.items" class="order-item">
+            <img [src]="item.image" [alt]="item.name" class="item-image">
+            <div class="item-details">
+              <div class="item-name">{{item.name}}</div>
+              <div class="item-quantity">Quantity: {{item.quantity}}</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Shipping Address -->
+      <div class="shipping-address-section">
+        <h2>Delivery Address</h2>
+        <div class="address-card">
+          <i class="fas fa-map-marker-alt"></i>
+          <div class="address-info">
+            <div class="address-name">{{orderDetails.shippingAddress.name}}</div>
+            <div class="address-street">{{orderDetails.shippingAddress.street}}</div>
+            <div class="address-city">
+              {{orderDetails.shippingAddress.city}}, {{orderDetails.shippingAddress.state}} {{orderDetails.shippingAddress.zipCode}}
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Action Buttons -->
+      <div class="action-buttons">
+        <button class="btn btn-primary" (click)="downloadInvoice()">
+          <i class="fas fa-download"></i> Download Invoice
+        </button>
+        <button class="btn btn-outline" (click)="contactSupport()">
+          <i class="fas fa-headset"></i> Contact Support
+        </button>
+      </div>
+
+      <!-- Help Section -->
+      <div class="help-section">
+        <h3>Need Help?</h3>
+        <div class="help-cards">
+          <div class="help-card">
+            <i class="fas fa-phone"></i>
+            <h4>Call Support</h4>
+            <p>24/7 customer support available</p>
+            <a href="tel:1-800-123-4567" class="help-link">1-800-123-4567</a>
+          </div>
+          <div class="help-card">
+            <i class="fas fa-envelope"></i>
+            <h4>Email Support</h4>
+            <p>Get help via email within 24 hours</p>
+            <a href="mailto:support@ecommerce.com" class="help-link">support@ecommerce.com</a>
+          </div>
+          <div class="help-card">
+            <i class="fas fa-comments"></i>
+            <h4>Live Chat</h4>
+            <p>Chat with our support team</p>
+            <button class="help-link btn-link">Start Chat</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

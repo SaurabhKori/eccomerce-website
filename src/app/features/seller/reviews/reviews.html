@@ -1,0 +1,363 @@
+<div class="seller-reviews">
+  <!-- Shared Sidebar -->
+  <app-sidebar 
+    [collapsed]="sidebarCollapsed" 
+    [navItems]="navItems"
+    (toggle)="toggleSidebar()">
+  </app-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="page-title">Reviews</h1>
+        <nav class="breadcrumb">
+          <span>Home</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Reviews</span>
+        </nav>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-secondary" (click)="exportReviews()">
+          <i class="fas fa-download"></i>
+          Export
+        </button>
+        <button class="btn btn-secondary" (click)="bulkApprove()">
+          <i class="fas fa-check-double"></i>
+          Bulk Approve
+        </button>
+      </div>
+    </header>
+
+    <!-- Reviews Content -->
+    <div class="reviews-content">
+      <!-- Review Stats -->
+      <div class="review-stats">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-star"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{reviewStats.totalReviews}}</h3>
+            <p>Total Reviews</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-star-half-alt"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{reviewStats.averageRating}}</h3>
+            <p>Average Rating</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{reviewStats.pendingReviews}}</h3>
+            <p>Pending</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{reviewStats.approvedReviews}}</h3>
+            <p>Approved</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-user-check"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{reviewStats.verifiedReviews}}</h3>
+            <p>Verified</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-reply"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatPercentage(reviewStats.responseRate)}}</h3>
+            <p>Response Rate</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Rating Distribution -->
+      <div class="rating-distribution">
+        <div class="distribution-header">
+          <h3>Rating Distribution</h3>
+          <span class="total-reviews">{{reviewStats.totalReviews}} reviews</span>
+        </div>
+        <div class="distribution-bars">
+          <div class="rating-bar" *ngFor="let rating of [5, 4, 3, 2, 1]">
+            <span class="rating-stars">
+              <i class="fas fa-star" *ngFor="let star of createArray(rating)"></i>
+            </span>
+            <div class="progress-bar">
+              <div class="progress-fill" [style.width.%]="getRatingPercentage(rating)"></div>
+            </div>
+            <span class="count">{{getRatingCount(rating)}}</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <div class="filters-left">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search reviews..." (input)="onSearch($event)" [(ngModel)]="searchTerm">
+          </div>
+          
+          <select class="filter-select" [(ngModel)]="selectedRating" (change)="onRatingChange()">
+            <option value="">All Ratings</option>
+            <option value="5">5 Stars</option>
+            <option value="4">4 Stars</option>
+            <option value="3">3 Stars</option>
+            <option value="2">2 Stars</option>
+            <option value="1">1 Star</option>
+          </select>
+          
+          <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+            <option value="">All Status</option>
+            <option value="approved">Approved</option>
+            <option value="pending">Pending</option>
+            <option value="rejected">Rejected</option>
+          </select>
+          
+          <select class="filter-select" [(ngModel)]="selectedProduct" (change)="onProductChange()">
+            <option value="">All Products</option>
+            <option *ngFor="let product of products" [value]="product.id">{{product.name}}</option>
+          </select>
+        </div>
+        
+        <div class="filters-right">
+          <div class="stats-summary">
+            <span class="stat-item">
+              <span class="stat-label">Filtered:</span>
+              <span class="stat-value">{{filteredReviews.length}}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Reviews List -->
+      <div class="reviews-list">
+        <div *ngFor="let review of paginatedReviews" class="review-card">
+          <div class="review-header">
+            <div class="customer-info">
+              <img [src]="review.customer.avatar" [alt]="review.customer.name" class="customer-avatar">
+              <div class="customer-details">
+                <h4>{{review.customer.name}}</h4>
+                <span class="customer-email">{{review.customer.email}}</span>
+                <span class="review-date">{{formatDate(review.date)}}</span>
+              </div>
+            </div>
+            
+            <div class="review-rating">
+              <div class="rating-stars">
+                <i class="fas fa-star" *ngFor="let star of getRatingStars(review.rating); let i = index" 
+                   [class.fas]="star === 1" [class.far]="star === 0" [class.fa-star-half-alt]="star === 0.5"></i>
+              </div>
+              <span class="rating-value">{{review.rating}}</span>
+            </div>
+            
+            <div class="review-status">
+              <span class="status-badge" [class]="getStatusClass(review.status)">{{review.status}}</span>
+              <span *ngIf="review.verified" class="verified-badge">
+                <i class="fas fa-check-circle"></i>
+                Verified
+              </span>
+            </div>
+          </div>
+          
+          <div class="review-content">
+            <h3 class="review-title">{{review.title}}</h3>
+            <p class="review-text">{{review.content}}</p>
+            
+            <div class="review-images" *ngIf="review.images && review.images.length > 0">
+              <div class="image-gallery">
+                <img *ngFor="let image of review.images" [src]="image" [alt]="'Review image'" class="review-image">
+              </div>
+            </div>
+          </div>
+          
+          <div class="review-product">
+            <img [src]="review.product.image" [alt]="review.product.name" class="product-image">
+            <div class="product-info">
+              <h4>{{review.product.name}}</h4>
+              <span class="product-sku">SKU: {{review.product.sku}}</span>
+            </div>
+          </div>
+          
+          <div class="review-actions">
+            <div class="helpful-section">
+              <span class="helpful-label">Helpful?</span>
+              <button class="helpful-btn" (click)="markHelpful(review.id)">
+                <i class="fas fa-thumbs-up"></i>
+                <span>{{review.helpful}}</span>
+              </button>
+              <button class="not-helpful-btn" (click)="markNotHelpful(review.id)">
+                <i class="fas fa-thumbs-down"></i>
+                <span>{{review.notHelpful}}</span>
+              </button>
+            </div>
+            
+            <div class="admin-actions">
+              <button class="action-btn view" (click)="viewReview(review.id)" title="View Review">
+                <i class="fas fa-eye"></i>
+              </button>
+              <button class="action-btn approve" *ngIf="review.status === 'pending'" (click)="approveReview(review.id)" title="Approve Review">
+                <i class="fas fa-check"></i>
+              </button>
+              <button class="action-btn reject" *ngIf="review.status === 'pending'" (click)="rejectReview(review.id)" title="Reject Review">
+                <i class="fas fa-times"></i>
+              </button>
+            </div>
+          </div>
+          
+          <div class="review-response" *ngIf="review.response">
+            <div class="response-header">
+              <i class="fas fa-reply"></i>
+              <span>Your Response</span>
+              <span class="response-date">{{formatDate(review.respondedAt!)}}</span>
+            </div>
+            <p class="response-text">{{review.response}}</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <div class="page-numbers">
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="page-number" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{page}}
+          </button>
+        </div>
+        
+        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Review Modal -->
+  <div class="modal-overlay" [class.show]="showReviewModal" (click)="closeModalOnOverlay($event)">
+    <div class="modal-content review-modal" [class.show]="showReviewModal">
+      <div class="modal-header">
+        <h2>Review Details</h2>
+        <button class="close-btn" (click)="closeReviewModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="review-details" *ngIf="selectedReview">
+        <!-- Customer Information -->
+        <div class="review-section">
+          <h3>Customer Information</h3>
+          <div class="customer-details-full">
+            <div class="customer-avatar-large">
+              <img [src]="selectedReview.customer.avatar" [alt]="selectedReview.customer.name">
+            </div>
+            <div class="customer-info-full">
+              <h4>{{selectedReview.customer.name}}</h4>
+              <p class="customer-email">{{selectedReview.customer.email}}</p>
+              <span class="review-date-full">{{formatDate(selectedReview.date)}}</span>
+              <div class="review-rating-large">
+                <div class="rating-stars">
+                  <i class="fas fa-star" *ngFor="let star of getRatingStars(selectedReview.rating); let i = index" 
+                     [class.fas]="star === 1" [class.far]="star === 0" [class.fa-star-half-alt]="star === 0.5"></i>
+                </div>
+                <span class="rating-value">{{selectedReview.rating}}</span>
+              </div>
+              <div class="review-status-large">
+                <span class="status-badge" [class]="getStatusClass(selectedReview.status)">{{selectedReview.status}}</span>
+                <span *ngIf="selectedReview.verified" class="verified-badge">
+                  <i class="fas fa-check-circle"></i>
+                  Verified
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Review Content -->
+        <div class="review-section">
+          <h3>Review Content</h3>
+          <div class="review-content-full">
+            <h4 class="review-title-full">{{selectedReview.title}}</h4>
+            <p class="review-text-full">{{selectedReview.content}}</p>
+            
+            <div class="review-images-full" *ngIf="selectedReview.images && selectedReview.images.length > 0">
+              <div class="image-gallery-full">
+                <img *ngFor="let image of selectedReview.images" [src]="image" [alt]="'Review image'" class="review-image-large">
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Product Information -->
+        <div class="review-section">
+          <h3>Product Information</h3>
+          <div class="product-details-full">
+            <img [src]="selectedReview.product.image" [alt]="selectedReview.product.name" class="product-image-large">
+            <div class="product-info-full">
+              <h4>{{selectedReview.product.name}}</h4>
+              <span class="product-sku-full">SKU: {{selectedReview.product.sku}}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Response Section -->
+        <div class="review-section">
+          <h3>Response</h3>
+          <div class="response-section-full">
+            <div *ngIf="selectedReview.response" class="existing-response">
+              <div class="response-header-full">
+                <i class="fas fa-reply"></i>
+                <span>Your Response</span>
+                <span class="response-date">{{formatDate(selectedReview.respondedAt!)}}</span>
+              </div>
+              <p class="response-text-full">{{selectedReview.response}}</p>
+            </div>
+            
+            <div *ngIf="!selectedReview.response" class="add-response">
+              <form [formGroup]="responseForm" (ngSubmit)="respondToReview()">
+                <textarea formControlName="response" placeholder="Write your response to this review..." class="form-control" rows="4"></textarea>
+                <div class="response-actions">
+                  <button type="button" class="btn btn-secondary" (click)="closeReviewModal()">Cancel</button>
+                  <button type="submit" class="btn btn-primary" [disabled]="responseForm.invalid || responding">
+                    <i class="fas fa-reply"></i>
+                    {{responding ? 'Sending...' : 'Send Response'}}
+                  </button>
+                </div>
+              </form>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

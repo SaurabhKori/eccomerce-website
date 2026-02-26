@@ -1,0 +1,40 @@
+<header class="main-nav">
+  <div class="nav-container">
+    <div class="nav-left">
+      <div class="logo">
+        <h2>ECommerce</h2>
+      </div>
+      <nav class="nav-menu">
+        <a href="/products" class="nav-link">Products</a>
+        <a href="/categories" class="nav-link">Categories</a>
+        <a href="/deals" class="nav-link">Deals</a>
+        <a href="/about" class="nav-link">About</a>
+      </nav>
+    </div>
+    
+    <div class="nav-right">
+      <div class="search-bar">
+        <input type="text" #searchInput placeholder="Search products..." class="search-input" (input)="onSearch($event)" (keyup.enter)="onSearchSubmit(searchInput)">
+        <button class="search-btn" (click)="onSearchSubmit(searchInput)">
+          <i class="fas fa-search"></i>
+        </button>
+      </div>
+      
+      <div class="nav-actions">
+        <a href="/wishlist" class="nav-link">
+          <i class="far fa-heart"></i>
+          <span class="nav-text">Wishlist</span>
+        </a>
+        <a href="/cart" class="nav-link cart-link">
+          <i class="fas fa-shopping-cart"></i>
+          <span class="cart-count" *ngIf="cartItems > 0">{{cartItems}}</span>
+        </a>
+        <div class="user-menu" (click)="onUserMenu()">
+          <img [src]="userAvatar" alt="User" class="user-avatar">
+          <span class="user-name">{{userName}}</span>
+          <i class="fas fa-chevron-down"></i>
+        </div>
+      </div>
+    </div>
+  </div>
+</header>

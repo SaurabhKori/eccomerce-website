@@ -1,0 +1,165 @@
+<div class="product-detail-page">
+  <app-navbar></app-navbar>
+  
+  <div class="product-detail-container">
+    <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
+  
+  <div class="product-detail-main" [class.sidebar-collapsed]="sidebarCollapsed">
+    <div class="breadcrumb">
+      <a href="/">Home</a> / 
+      <a href="/products">Products</a> / 
+      <span *ngIf="product">{{product.name}}</span>
+    </div>
+
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading product details...</p>
+    </div>
+
+    <div *ngIf="!loading && product" class="product-content">
+      <div class="product-images-section">
+        <div class="main-image">
+          <img [src]="product.images[selectedImageIndex]" [alt]="product.name">
+        </div>
+        <div class="thumbnail-images">
+          <div 
+            *ngFor="let image of product.images; let i = index" 
+            class="thumbnail"
+            [class.active]="i === selectedImageIndex"
+            (click)="selectImage(i)"
+          >
+            <img [src]="image" [alt]="`${product.name} ${i+1}`">
+          </div>
+        </div>
+      </div>
+
+      <div class="product-info-section">
+        <div class="product-header">
+          <h1 class="product-name">{{product.name}}</h1>
+          <div class="product-meta">
+            <div class="rating">
+              <i class="fas fa-star"></i>
+              <span>{{product.rating}}</span>
+              <span class="reviews-count">({{product.reviews}} reviews)</span>
+            </div>
+            <div class="brand">Brand: {{product.brand}}</div>
+          </div>
+        </div>
+
+        <div class="product-price">
+          <span class="current-price">{{formatCurrency(product.price)}}</span>
+          <span *ngIf="product.originalPrice" class="original-price">
+            {{formatCurrency(product.originalPrice)}}
+          </span>
+          <span *ngIf="product.originalPrice" class="discount-badge">
+            -{{getDiscountPercentage(product.originalPrice, product.price)}}%
+          </span>
+        </div>
+
+        <div class="product-description">
+          <h3>Description</h3>
+          <p>{{product.description}}</p>
+        </div>
+
+        <div class="product-variants" *ngIf="product.variants.size?.length || product.variants.color?.length">
+          <div class="size-selector" *ngIf="product.variants.size?.length">
+            <h4>Size</h4>
+            <div class="size-options">
+              <button 
+                *ngFor="let size of product.variants.size" 
+                class="size-btn"
+                [class.selected]="selectedSize === size"
+                (click)="selectSize(size)"
+              >
+                {{size}}
+              </button>
+            </div>
+          </div>
+
+          <div class="color-selector" *ngIf="product.variants.color?.length">
+            <h4>Color</h4>
+            <div class="color-options">
+              <button 
+                *ngFor="let color of product.variants.color" 
+                class="color-btn"
+                [class.selected]="selectedColor === color"
+                [style.background-color]="color.toLowerCase()"
+                (click)="selectColor(color)"
+                [title]="color"
+              ></button>
+            </div>
+          </div>
+        </div>
+
+        <div class="stock-info">
+          <span [class]="product.stock > 10 ? 'in-stock' : 'low-stock'">
+            {{product.stock > 10 ? '✓ In Stock' : `Only ${product.stock} left`}}
+          </span>
+        </div>
+
+        <div class="purchase-section">
+          <div class="quantity-selector">
+            <label>Quantity:</label>
+            <div class="quantity-controls">
+              <button class="quantity-btn" (click)="updateQuantity('decrease')" [disabled]="quantity <= 1">
+                <i class="fas fa-minus"></i>
+              </button>
+              <input type="number" [(ngModel)]="quantity" min="1" [max]="product.stock">
+              <button class="quantity-btn" (click)="updateQuantity('increase')" [disabled]="quantity >= product.stock">
+                <i class="fas fa-plus"></i>
+              </button>
+            </div>
+          </div>
+
+          <div class="action-buttons">
+            <button class="btn btn-primary add-to-cart" (click)="addToCart()">
+              <i class="fas fa-shopping-cart"></i> Add to Cart
+            </button>
+            <button class="btn btn-success buy-now" (click)="buyNow()">
+              <i class="fas fa-bolt"></i> Buy Now
+            </button>
+            <button class="btn btn-outline wishlist" (click)="addToWishlist()">
+              <i class="far fa-heart"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="!loading && product" class="product-reviews">
+      <h2>Customer Reviews</h2>
+      <div class="reviews-summary">
+        <div class="average-rating">
+          <div class="rating-number">{{product.rating}}</div>
+          <div class="rating-stars">
+            <i class="fas fa-star" *ngFor="let star of getRatingStars(product.rating)"></i>
+            <i class="fas fa-star-half-alt" *ngIf="product.rating % 1 !== 0"></i>
+          </div>
+          <div class="total-reviews">{{product.reviews}} Reviews</div>
+        </div>
+      </div>
+
+      <div class="reviews-list">
+        <div *ngFor="let review of reviews" class="review-item">
+          <div class="review-header">
+            <div class="reviewer-info">
+              <span class="reviewer-name">{{review.userName}}</span>
+              <span *ngIf="review.verified" class="verified-badge">
+                <i class="fas fa-check-circle"></i> Verified Purchase
+              </span>
+            </div>
+            <div class="review-date">{{review.date}}</div>
+          </div>
+          <div class="review-rating">
+            <i class="fas fa-star" *ngFor="let star of createArray(review.rating)"></i>
+            <i class="far fa-star" *ngFor="let star of createArray(5 - review.rating)"></i>
+          </div>
+          <div class="review-comment">{{review.comment}}</div>
+        </div>
+      </div>
+    </div>
+    </div>
+  </div>
+  
+  <app-footer></app-footer>
+</div>

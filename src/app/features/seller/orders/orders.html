@@ -1,0 +1,399 @@
+<div class="seller-orders">
+  <!-- Shared Sidebar -->
+  <app-sidebar 
+    [collapsed]="sidebarCollapsed" 
+    [navItems]="navItems"
+    (toggle)="toggleSidebar()">
+  </app-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="page-title">Orders</h1>
+        <nav class="breadcrumb">
+          <span>Home</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Orders</span>
+        </nav>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-secondary" (click)="exportOrders()">
+          <i class="fas fa-download"></i>
+          Export
+        </button>
+      </div>
+    </header>
+
+    <!-- Orders Content -->
+    <div class="orders-content">
+      <!-- Order Stats -->
+      <div class="order-stats">
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-shopping-cart"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatNumber(orderStats.totalOrders)}}</h3>
+            <p>Total Orders</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-clock"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatNumber(orderStats.pendingOrders)}}</h3>
+            <p>Pending</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-cog"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatNumber(orderStats.processingOrders)}}</h3>
+            <p>Processing</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-truck"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatNumber(orderStats.shippedOrders)}}</h3>
+            <p>Shipped</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-check-circle"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatNumber(orderStats.deliveredOrders)}}</h3>
+            <p>Delivered</p>
+          </div>
+        </div>
+        
+        <div class="stat-card">
+          <div class="stat-icon">
+            <i class="fas fa-dollar-sign"></i>
+          </div>
+          <div class="stat-content">
+            <h3>{{formatCurrency(orderStats.totalRevenue)}}</h3>
+            <p>Total Revenue</p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Filters Section -->
+      <div class="filters-section">
+        <div class="filters-left">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search orders..." (input)="onSearch($event)" [(ngModel)]="searchTerm">
+          </div>
+          
+          <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+            <option value="">All Status</option>
+            <option value="pending">Pending</option>
+            <option value="processing">Processing</option>
+            <option value="shipped">Shipped</option>
+            <option value="delivered">Delivered</option>
+            <option value="cancelled">Cancelled</option>
+            <option value="refunded">Refunded</option>
+          </select>
+          
+          <select class="filter-select" [(ngModel)]="selectedDateRange" (change)="onDateRangeChange()">
+            <option value="">All Time</option>
+            <option value="today">Today</option>
+            <option value="week">Last Week</option>
+            <option value="month">Last Month</option>
+            <option value="year">Last Year</option>
+          </select>
+        </div>
+        
+        <div class="filters-right">
+          <div class="stats-summary">
+            <span class="stat-item">
+              <span class="stat-label">Filtered:</span>
+              <span class="stat-value">{{filteredOrders.length}}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Orders Table -->
+      <div class="orders-table-container">
+        <table class="orders-table">
+          <thead>
+            <tr>
+              <th>Order ID</th>
+              <th>Customer</th>
+              <th>Products</th>
+              <th>Total</th>
+              <th>Status</th>
+              <th>Payment</th>
+              <th>Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let order of paginatedOrders">
+              <td>
+                <span class="order-id">#{{order.id}}</span>
+              </td>
+              <td>
+                <div class="customer-info">
+                  <img [src]="order.customer.avatar" [alt]="order.customer.name" class="customer-avatar">
+                  <div class="customer-details">
+                    <h4>{{order.customer.name}}</h4>
+                    <span class="customer-email">{{order.customer.email}}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="order-products">
+                  <div class="product-count">{{order.products.length}} items</div>
+                  <div class="product-list">
+                    <div *ngFor="let product of order.products.slice(0, 2)" class="product-item">
+                      <img [src]="product.image" [alt]="product.name" class="product-image">
+                      <span class="product-name">{{product.name}}</span>
+                    </div>
+                    <span *ngIf="order.products.length > 2" class="more-products">+{{order.products.length - 2}} more</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="order-total">
+                  <span class="total-amount">{{formatCurrency(order.total)}}</span>
+                  <div class="order-breakdown">
+                    <span class="subtotal">Subtotal: {{formatCurrency(order.subtotal)}}</span>
+                    <span class="tax">Tax: {{formatCurrency(order.tax)}}</span>
+                    <span class="shipping">Shipping: {{formatCurrency(order.shipping)}}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <span class="status-badge" [class]="getStatusClass(order.status)">{{order.status}}</span>
+              </td>
+              <td>
+                <div class="payment-info">
+                  <span class="payment-method">{{order.paymentMethod}}</span>
+                  <span class="payment-status" [class]="getPaymentStatusClass(order.paymentStatus)">{{order.paymentStatus}}</span>
+                </div>
+              </td>
+              <td>
+                <div class="order-date">
+                  <span class="date">{{order.orderDate | date:'MMM dd, yyyy'}}</span>
+                  <span class="time">{{order.orderDate | date:'HH:mm'}}</span>
+                </div>
+              </td>
+              <td>
+                <div class="order-actions">
+                  <button class="action-btn view" (click)="viewOrder(order.id)" title="View Order">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="action-btn print" (click)="printOrder(order.id)" title="Print Order">
+                    <i class="fas fa-print"></i>
+                  </button>
+                  <div class="status-actions" *ngIf="order.status === 'pending' || order.status === 'processing'">
+                    <button class="action-btn process" (click)="updateOrderStatus(order.id, 'processing')" title="Process Order">
+                      <i class="fas fa-cog"></i>
+                    </button>
+                    <button class="action-btn ship" (click)="updateOrderStatus(order.id, 'shipped')" title="Ship Order">
+                      <i class="fas fa-truck"></i>
+                    </button>
+                  </div>
+                  <div class="status-actions" *ngIf="order.status === 'shipped'">
+                    <button class="action-btn deliver" (click)="updateOrderStatus(order.id, 'delivered')" title="Mark as Delivered">
+                      <i class="fas fa-check"></i>
+                    </button>
+                  </div>
+                  <div class="status-actions" *ngIf="order.status === 'delivered' && order.paymentStatus === 'paid'">
+                    <button class="action-btn refund" (click)="refundOrder(order.id)" title="Refund Order">
+                      <i class="fas fa-undo"></i>
+                    </button>
+                  </div>
+                  <div class="status-actions" *ngIf="order.status === 'pending' || order.status === 'processing'">
+                    <button class="action-btn cancel" (click)="cancelOrder(order.id)" title="Cancel Order">
+                      <i class="fas fa-times"></i>
+                    </button>
+                  </div>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <div class="page-numbers">
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="page-number" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{page}}
+          </button>
+        </div>
+        
+        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Order Modal -->
+  <div class="modal-overlay" [class.show]="showOrderModal" (click)="closeModalOnOverlay($event)">
+    <div class="modal-content order-modal" [class.show]="showOrderModal">
+      <div class="modal-header">
+        <h2>Order Details #{{selectedOrder?.id}}</h2>
+        <button class="close-btn" (click)="closeOrderModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="order-details" *ngIf="selectedOrder">
+        <!-- Customer Information -->
+        <div class="order-section">
+          <h3>Customer Information</h3>
+          <div class="customer-details-full">
+            <div class="customer-avatar-large">
+              <img [src]="selectedOrder.customer.avatar" [alt]="selectedOrder.customer.name">
+            </div>
+            <div class="customer-info-full">
+              <h4>{{selectedOrder.customer.name}}</h4>
+              <p class="customer-email">{{selectedOrder.customer.email}}</p>
+              <p class="customer-phone">{{selectedOrder.customer.phone}}</p>
+              <p class="customer-address">{{selectedOrder.customer.address}}</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Items -->
+        <div class="order-section">
+          <h3>Order Items</h3>
+          <div class="order-items-list">
+            <div *ngFor="let product of selectedOrder.products" class="order-item">
+              <img [src]="product.image" [alt]="product.name" class="product-image">
+              <div class="product-details">
+                <h4>{{product.name}}</h4>
+                <span class="product-sku">SKU: {{product.sku}}</span>
+              </div>
+              <div class="product-quantity">
+                <span class="quantity">Qty: {{product.quantity}}</span>
+              </div>
+              <div class="product-price">
+                <span class="price">{{formatCurrency(product.price)}}</span>
+              </div>
+              <div class="product-total">
+                <span class="total">{{formatCurrency(product.total)}}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Summary -->
+        <div class="order-section">
+          <h3>Order Summary</h3>
+          <div class="order-summary-details">
+            <div class="summary-row">
+              <span>Subtotal:</span>
+              <span>{{formatCurrency(selectedOrder.subtotal)}}</span>
+            </div>
+            <div class="summary-row">
+              <span>Tax:</span>
+              <span>{{formatCurrency(selectedOrder.tax)}}</span>
+            </div>
+            <div class="summary-row">
+              <span>Shipping:</span>
+              <span>{{formatCurrency(selectedOrder.shipping)}}</span>
+            </div>
+            <div *ngIf="selectedOrder.discount" class="summary-row discount">
+              <span>Discount:</span>
+              <span>-{{formatCurrency(selectedOrder.discount)}}</span>
+            </div>
+            <div class="summary-row total">
+              <span>Total:</span>
+              <span>{{formatCurrency(selectedOrder.total)}}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Order Status -->
+        <div class="order-section">
+          <h3>Order Status</h3>
+          <div class="status-info">
+            <div class="status-row">
+              <span>Order Status:</span>
+              <span class="status-badge" [class]="getStatusClass(selectedOrder.status)">{{selectedOrder.status}}</span>
+            </div>
+            <div class="status-row">
+              <span>Payment Status:</span>
+              <span class="payment-status" [class]="getPaymentStatusClass(selectedOrder.paymentStatus)">{{selectedOrder.paymentStatus}}</span>
+            </div>
+            <div class="status-row">
+              <span>Payment Method:</span>
+              <span>{{selectedOrder.paymentMethod}}</span>
+            </div>
+            <div class="status-row">
+              <span>Order Date:</span>
+              <span>{{selectedOrder.orderDate | date:'MMM dd, yyyy HH:mm'}}</span>
+            </div>
+            <div *ngIf="selectedOrder.shippingDate" class="status-row">
+              <span>Shipping Date:</span>
+              <span>{{selectedOrder.shippingDate | date:'MMM dd, yyyy HH:mm'}}</span>
+            </div>
+            <div *ngIf="selectedOrder.deliveredDate" class="status-row">
+              <span>Delivered Date:</span>
+              <span>{{selectedOrder.deliveredDate | date:'MMM dd, yyyy HH:mm'}}</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Tracking Information -->
+        <div class="order-section" *ngIf="selectedOrder.status === 'shipped' || selectedOrder.status === 'delivered'">
+          <h3>Tracking Information</h3>
+          <div class="tracking-info">
+            <div *ngIf="selectedOrder.trackingNumber" class="tracking-number">
+              <span>Tracking Number:</span>
+              <span class="tracking-code">{{selectedOrder.trackingNumber}}</span>
+            </div>
+            <div *ngIf="!selectedOrder.trackingNumber" class="add-tracking">
+              <form [formGroup]="trackingForm" (ngSubmit)="addTrackingNumber()">
+                <input type="text" formControlName="trackingNumber" placeholder="Enter tracking number" class="form-control">
+                <button type="submit" class="btn btn-primary btn-sm">Add Tracking</button>
+              </form>
+            </div>
+          </div>
+        </div>
+
+        <!-- Notes -->
+        <div class="order-section">
+          <h3>Notes</h3>
+          <div class="notes-section">
+            <div *ngIf="selectedOrder.notes" class="existing-notes">
+              <p>{{selectedOrder.notes}}</p>
+            </div>
+            <form [formGroup]="notesForm" (ngSubmit)="addNotes()">
+              <textarea formControlName="notes" placeholder="Add notes about this order..." class="form-control" rows="3"></textarea>
+              <button type="submit" class="btn btn-primary btn-sm">Add Note</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

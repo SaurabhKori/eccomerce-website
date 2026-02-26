@@ -1,0 +1,109 @@
+<div class="home-page">
+  <!-- Navigation Bar -->
+  <app-navbar></app-navbar>
+
+  <!-- Hero Banner -->
+  <section class="hero-banner">
+    <div class="hero-content">
+      <h1 class="hero-title">Amazing Deals on Premium Products</h1>
+      <p class="hero-subtitle">Discover the latest trends and exclusive offers</p>
+      <div class="hero-actions">
+        <button class="btn btn-primary btn-large" (click)="viewCategory('all')">
+          Shop Now
+        </button>
+        <button class="btn btn-outline btn-large">
+          View Offers
+        </button>
+      </div>
+    </div>
+    <div class="hero-image">
+      <img src="https://via.placeholder.com/600x400" alt="Hero Banner">
+    </div>
+  </section>
+
+  <!-- Categories Section -->
+  <section class="categories-section">
+    <div class="container">
+      <h2 class="section-title">Shop by Category</h2>
+      <div class="categories-grid">
+        <div class="category-card" *ngFor="let category of categories" (click)="viewCategory(category.id)">
+          <div class="category-icon">
+            <i [class]="category.icon"></i>
+             <!-- <i class="fa-solid fa-shirt"></i> -->
+          </div>
+          <h3>{{category.name}}</h3>
+          <span class="product-count">{{category.productCount}} products</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Featured Products -->
+  <section class="featured-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Featured Products</h2>
+        <a class="view-all-link" routerLink="/products?featured=true">View All</a>
+      </div>
+      <div class="products-grid" *ngIf="!loading">
+        <app-product-card 
+          *ngFor="let product of featuredProducts" 
+          [product]="product"
+          (productClick)="viewProduct($event)"
+          (addToCart)="addToCart($event)"
+          (addToWishlist)="addToWishlist($event)">
+        </app-product-card>
+      </div>
+      <div class="loading-spinner" *ngIf="loading">
+        <i class="fas fa-spinner fa-spin"></i>
+      </div>
+    </div>
+  </section>
+
+  <!-- Top Rated Products -->
+  <section class="top-rated-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Top Rated Products</h2>
+        <a class="view-all-link" routerLink="/products?sort=rating">View All</a>
+      </div>
+      <div class="products-grid">
+        <app-product-card 
+          *ngFor="let product of topRatedProducts" 
+          [product]="product"
+          (productClick)="viewProduct($event)"
+          (addToCart)="addToCart($event)"
+          (addToWishlist)="addToWishlist($event)">
+        </app-product-card>
+      </div>
+    </div>
+  </section>
+
+  <!-- Offers Section -->
+  <section class="offers-section">
+    <div class="container">
+      <h2 class="section-title">Special Offers</h2>
+      <div class="offers-grid">
+        <div class="offer-card" *ngFor="let offer of offers">
+          <div class="offer-image">
+            <img [src]="offer.image" [alt]="offer.title">
+            <div class="offer-discount">
+              {{offer.discount}}% OFF
+            </div>
+          </div>
+          <div class="offer-content">
+            <h3>{{offer.title}}</h3>
+            <p>{{offer.description}}</p>
+            <div class="offer-validity">
+              <i class="far fa-clock"></i>
+              Valid until {{offer.validUntil | date:'mediumDate'}}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <app-footer></app-footer>
+</div>

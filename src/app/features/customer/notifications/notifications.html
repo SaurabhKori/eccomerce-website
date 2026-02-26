@@ -1,0 +1,128 @@
+<div class="notifications-page">
+  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
+  
+  <div class="notifications-main" [class.sidebar-collapsed]="sidebarCollapsed">
+    <!-- Header -->
+    <div class="notifications-header">
+      <h1>Notifications</h1>
+      <div class="header-actions">
+        <button class="btn btn-outline" (click)="markAllAsRead()" [disabled]="markAllLoading">
+          <i class="fas fa-check-double"></i>
+          <span *ngIf="!markAllLoading">Mark All Read</span>
+          <span *ngIf="markAllLoading">
+            <i class="fas fa-spinner fa-spin"></i> Marking...
+          </span>
+        </button>
+        <button class="btn btn-danger" (click)="clearAllNotifications()">
+          <i class="fas fa-trash"></i> Clear All
+        </button>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-section">
+      <form [formGroup]="filterForm" class="filters-form">
+        <div class="filter-group">
+          <input type="text" formControlName="search" class="form-control" placeholder="Search notifications...">
+        </div>
+        
+        <div class="filter-group">
+          <select formControlName="type" class="form-control">
+            <option value="all">All Notifications</option>
+            <option value="unread">Unread</option>
+            <option value="read">Read</option>
+            <option value="order">Orders</option>
+            <option value="offer">Offers</option>
+            <option value="price_drop">Price Drops</option>
+            <option value="system">System</option>
+          </select>
+        </div>
+      </form>
+    </div>
+
+    <!-- Loading State -->
+    <div *ngIf="loading" class="loading">
+      <div class="spinner"></div>
+      <p>Loading notifications...</p>
+    </div>
+
+    <!-- Notifications List -->
+    <div *ngIf="!loading" class="notifications-content">
+      <div *ngIf="filteredNotifications.length === 0" class="empty-notifications">
+        <i class="far fa-bell"></i>
+        <h3>No notifications</h3>
+        <p>{{filterForm.value.search ? 'No notifications match your search criteria.' : 'You\'re all caught up! No new notifications.'}}</p>
+      </div>
+
+      <div *ngIf="filteredNotifications.length > 0" class="notifications-list">
+        <div *ngFor="let notification of filteredNotifications" class="notification-item" 
+             [class.unread]="!notification.read" 
+             (click)="markAsRead(notification.id)">
+          <div class="notification-icon" [style.background-color]="getNotificationColor(notification.type)">
+            <i [class]="getNotificationIcon(notification.type)"></i>
+          </div>
+          
+          <div class="notification-content">
+            <div class="notification-header">
+              <h3>{{notification.title}}</h3>
+              <div class="notification-meta">
+                <span class="notification-date">{{formatDate(notification.date)}}</span>
+                <button class="delete-btn" (click)="deleteNotification(notification.id); $event.stopPropagation()">
+                  <i class="fas fa-times"></i>
+                </button>
+              </div>
+            </div>
+            
+            <p class="notification-message">{{notification.message}}</p>
+            
+            <!-- Order-specific details -->
+            <div *ngIf="notification.type === 'order' && notification.metadata?.orderId" class="notification-details">
+              <div class="detail-item">
+                <span class="detail-label">Order ID:</span>
+                <span class="detail-value">{{notification.metadata?.orderId}}</span>
+              </div>
+            </div>
+            
+            <!-- Offer-specific details -->
+            <div *ngIf="notification.type === 'offer' && notification.metadata?.discount" class="notification-details">
+              <div class="detail-item">
+                <span class="detail-label">Discount:</span>
+                <span class="detail-value discount">{{notification.metadata?.discount}}% OFF</span>
+              </div>
+            </div>
+            
+            <!-- Price drop-specific details -->
+            <div *ngIf="notification.type === 'price_drop' && notification.metadata?.oldPrice && notification.metadata?.newPrice" class="notification-details">
+              <div class="detail-item">
+                <span class="detail-label">Price Drop:</span>
+                <span class="detail-value">
+                  <span class="old-price">${{notification.metadata?.oldPrice}}</span>
+                  <span class="new-price">${{notification.metadata?.newPrice}}</span>
+                </span>
+              </div>
+            </div>
+            
+            <!-- Action Button -->
+            <div *ngIf="notification.actionText" class="notification-action">
+              <button class="btn btn-primary action-btn" (click)="takeAction(notification); $event.stopPropagation()">
+                {{notification.actionText}}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notification Stats -->
+    <div *ngIf="!loading && notifications.length > 0" class="notification-stats">
+      <div class="stat-item">
+        <span class="stat-number">{{getUnreadCount()}}</span>
+        <span class="stat-label">Unread</span>
+      </div>
+      <div class="stat-item">
+        <span class="stat-number">{{notifications.length}}</span>
+        <span class="stat-label">Total</span>
+      </div>
+    </div>
+  </div>
+</div>

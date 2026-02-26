@@ -1,0 +1,377 @@
+<div class="admin-customers">
+  <!-- Shared Sidebar -->
+  <app-admin-sidebar 
+    [sidebarCollapsed]="sidebarCollapsed" 
+    [pendingOrders]="0"
+    (sidebarToggle)="toggleSidebar()">
+  </app-admin-sidebar>
+
+  <!-- Main Content -->
+  <main class="main-content">
+    <!-- Header -->
+    <header class="header">
+      <div class="header-left">
+        <h1 class="page-title">Customers</h1>
+        <nav class="breadcrumb">
+          <span>Home</span>
+          <i class="fas fa-chevron-right"></i>
+          <span>Customers</span>
+        </nav>
+      </div>
+      
+      <div class="header-right">
+        <button class="btn btn-primary" (click)="openCustomerModal()">
+          <i class="fas fa-plus"></i>
+          Add Customer
+        </button>
+        <button class="btn btn-secondary" (click)="exportCustomers()">
+          <i class="fas fa-download"></i>
+          Export
+        </button>
+      </div>
+    </header>
+
+    <!-- Customers Content -->
+    <div class="customers-content">
+      <!-- Filters and Search -->
+      <div class="filters-section">
+        <div class="filters-left">
+          <div class="search-box">
+            <i class="fas fa-search"></i>
+            <input type="text" placeholder="Search customers..." (input)="onSearch($event)" [(ngModel)]="searchTerm">
+          </div>
+          
+          <select class="filter-select" [(ngModel)]="selectedStatus" (change)="onStatusChange()">
+            <option value="">All Status</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+            <option value="vip">VIP</option>
+          </select>
+          
+          <select class="filter-select" [(ngModel)]="selectedCustomerType" (change)="onCustomerTypeChange()">
+            <option value="">All Types</option>
+            <option value="regular">Regular</option>
+            <option value="vip">VIP</option>
+          </select>
+        </div>
+        
+        <div class="filters-right">
+          <div class="view-toggle">
+            <button class="view-btn" [class.active]="viewMode === 'grid'" (click)="setViewMode('grid')">
+              <i class="fas fa-th"></i>
+            </button>
+            <button class="view-btn" [class.active]="viewMode === 'list'" (click)="setViewMode('list')">
+              <i class="fas fa-list"></i>
+            </button>
+          </div>
+          
+          <div class="stats-summary">
+            <span class="stat-item">
+              <span class="stat-label">Total:</span>
+              <span class="stat-value">{{filteredCustomers.length}}</span>
+            </span>
+            <span class="stat-item">
+              <span class="stat-label">VIP:</span>
+              <span class="stat-value">{{vipCustomerCount}}</span>
+            </span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customers Grid View -->
+      <div class="customers-grid" *ngIf="viewMode === 'grid'">
+        <div class="customer-card" *ngFor="let customer of paginatedCustomers">
+          <div class="customer-header">
+            <img [src]="customer.avatar" [alt]="customer.name" class="customer-avatar">
+            <div class="customer-info">
+              <h3>{{customer.name}}</h3>
+              <p>{{customer.email}}</p>
+              <span class="status-badge" [class]="customer.status">{{customer.status}}</span>
+            </div>
+          </div>
+          
+          <div class="customer-details">
+            <div class="detail-item">
+              <i class="fas fa-phone"></i>
+              <span>{{customer.phone}}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-map-marker-alt"></i>
+              <span>{{customer.city}}, {{customer.state}}</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-shopping-bag"></i>
+              <span>{{customer.totalOrders}} orders</span>
+            </div>
+            <div class="detail-item">
+              <i class="fas fa-dollar-sign"></i>
+              <span>${{customer.totalSpent | number}}</span>
+            </div>
+          </div>
+          
+          <div class="customer-actions">
+            <button class="action-btn view" (click)="viewCustomer(customer.id)" title="View Customer">
+              <i class="fas fa-eye"></i>
+            </button>
+            <button class="action-btn edit" (click)="editCustomer(customer.id)" title="Edit Customer">
+              <i class="fas fa-edit"></i>
+            </button>
+            <button class="action-btn delete" (click)="deleteCustomer(customer.id)" title="Delete Customer">
+              <i class="fas fa-trash"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Customers List View -->
+      <div class="customers-table-container" *ngIf="viewMode === 'list'">
+        <table class="customers-table">
+          <thead>
+            <tr>
+              <th>Customer</th>
+              <th>Contact</th>
+              <th>Location</th>
+              <th>Orders</th>
+              <th>Total Spent</th>
+              <th>Status</th>
+              <th>Join Date</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let customer of paginatedCustomers">
+              <td>
+                <div class="customer-info-cell">
+                  <img [src]="customer.avatar" [alt]="customer.name" class="customer-avatar-small">
+                  <div class="customer-details-cell">
+                    <h4>{{customer.name}}</h4>
+                    <span class="status-badge" [class]="customer.status">{{customer.status}}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="contact-info">
+                  <div class="contact-item">
+                    <i class="fas fa-envelope"></i>
+                    <span>{{customer.email}}</span>
+                  </div>
+                  <div class="contact-item">
+                    <i class="fas fa-phone"></i>
+                    <span>{{customer.phone}}</span>
+                  </div>
+                </div>
+              </td>
+              <td>
+                <div class="location-info">
+                  <span>{{customer.city}}, {{customer.state}}</span>
+                  <span class="country">{{customer.country}}</span>
+                </div>
+              </td>
+              <td>
+                <div class="orders-info">
+                  <span class="order-count">{{customer.totalOrders}}</span>
+                  <span class="last-order" *ngIf="customer.lastOrderDate">
+                    Last: {{customer.lastOrderDate | date:'MMM dd'}}
+                  </span>
+                </div>
+              </td>
+              <td>
+                <span class="total-spent">${{customer.totalSpent | number}}</span>
+              </td>
+              <td>
+                <span class="status-badge" [class]="customer.status">{{customer.status}}</span>
+              </td>
+              <td>
+                <span class="join-date">{{customer.joinDate | date:'MMM dd, yyyy'}}</span>
+              </td>
+              <td>
+                <div class="table-actions">
+                  <button class="action-btn view" (click)="viewCustomer(customer.id)" title="View Customer">
+                    <i class="fas fa-eye"></i>
+                  </button>
+                  <button class="action-btn edit" (click)="editCustomer(customer.id)" title="Edit Customer">
+                    <i class="fas fa-edit"></i>
+                  </button>
+                  <button class="action-btn delete" (click)="deleteCustomer(customer.id)" title="Delete Customer">
+                    <i class="fas fa-trash"></i>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Pagination -->
+      <div class="pagination" *ngIf="totalPages > 1">
+        <button class="pagination-btn" [disabled]="currentPage === 1" (click)="goToPage(currentPage - 1)">
+          <i class="fas fa-chevron-left"></i>
+        </button>
+        
+        <div class="page-numbers">
+          <button *ngFor="let page of getPageNumbers()" 
+                  class="page-number" 
+                  [class.active]="page === currentPage"
+                  (click)="goToPage(page)">
+            {{page}}
+          </button>
+        </div>
+        
+        <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="goToPage(currentPage + 1)">
+          <i class="fas fa-chevron-right"></i>
+        </button>
+      </div>
+    </div>
+  </main>
+
+  <!-- Customer Modal -->
+  <div class="modal-overlay" [class.show]="showCustomerModal" (click)="closeModalOnOverlay($event)">
+    <div class="modal-content customer-modal" [class.show]="showCustomerModal">
+      <div class="modal-header">
+        <h2>{{editingCustomer ? 'Edit Customer' : 'Customer Details'}}</h2>
+        <button class="close-btn" (click)="closeCustomerModal()">
+          <i class="fas fa-times"></i>
+        </button>
+      </div>
+      
+      <div class="customer-form" *ngIf="editingCustomer; else customerDetails">
+        <form [formGroup]="customerForm" (ngSubmit)="saveCustomer()">
+          <div class="form-grid">
+            <div class="form-group">
+              <label for="name">Name *</label>
+              <input id="name" type="text" formControlName="name" class="form-control" required>
+              <div class="error-message" *ngIf="customerForm.get('name')?.invalid && customerForm.get('name')?.touched">
+                Name is required
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="email">Email *</label>
+              <input id="email" type="email" formControlName="email" class="form-control" required>
+              <div class="error-message" *ngIf="customerForm.get('email')?.invalid && customerForm.get('email')?.touched">
+                Valid email is required
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="phone">Phone *</label>
+              <input id="phone" type="tel" formControlName="phone" class="form-control" required>
+              <div class="error-message" *ngIf="customerForm.get('phone')?.invalid && customerForm.get('phone')?.touched">
+                Phone is required
+              </div>
+            </div>
+            
+            <div class="form-group">
+              <label for="status">Status *</label>
+              <select id="status" formControlName="status" class="form-control" required>
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+                <option value="vip">VIP</option>
+              </select>
+            </div>
+            
+            <div class="form-group full-width">
+              <label for="address">Address *</label>
+              <input id="address" type="text" formControlName="address" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="city">City *</label>
+              <input id="city" type="text" formControlName="city" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="state">State *</label>
+              <input id="state" type="text" formControlName="state" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="zipCode">Zip Code *</label>
+              <input id="zipCode" type="text" formControlName="zipCode" class="form-control" required>
+            </div>
+            
+            <div class="form-group">
+              <label for="country">Country *</label>
+              <input id="country" type="text" formControlName="country" class="form-control" required>
+            </div>
+            
+            <div class="form-group full-width">
+              <label for="notes">Notes</label>
+              <textarea id="notes" formControlName="notes" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+          
+          <div class="form-actions">
+            <button type="button" class="btn btn-secondary" (click)="closeCustomerModal()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="customerForm.invalid || saving">
+              <i class="fas fa-save"></i>
+              {{saving ? 'Saving...' : 'Save Customer'}}
+            </button>
+          </div>
+        </form>
+      </div>
+      
+      <ng-template #customerDetails>
+        <div class="customer-details-view" *ngIf="selectedCustomer">
+          <div class="customer-overview">
+            <img [src]="selectedCustomer.avatar" [alt]="selectedCustomer.name" class="customer-avatar-large">
+            <div class="customer-overview-info">
+              <h3>{{selectedCustomer.name}}</h3>
+              <span class="status-badge" [class]="selectedCustomer.status">{{selectedCustomer.status}}</span>
+              <p class="customer-email">{{selectedCustomer.email}}</p>
+              <p class="customer-phone">{{selectedCustomer.phone}}</p>
+            </div>
+          </div>
+          
+          <div class="customer-stats">
+            <div class="stat-card">
+              <i class="fas fa-shopping-bag"></i>
+              <div class="stat-info">
+                <span class="stat-number">{{selectedCustomer.totalOrders}}</span>
+                <span class="stat-label">Total Orders</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-dollar-sign"></i>
+              <div class="stat-info">
+                <span class="stat-number">${{selectedCustomer.totalSpent | number}}</span>
+                <span class="stat-label">Total Spent</span>
+              </div>
+            </div>
+            <div class="stat-card">
+              <i class="fas fa-calendar"></i>
+              <div class="stat-info">
+                <span class="stat-number">{{selectedCustomer.joinDate | date:'MMM yyyy'}}</span>
+                <span class="stat-label">Customer Since</span>
+              </div>
+            </div>
+          </div>
+          
+          <div class="customer-address">
+            <h4>Address</h4>
+            <p>{{selectedCustomer.address}}</p>
+            <p>{{selectedCustomer.city}}, {{selectedCustomer.state}} {{selectedCustomer.zipCode}}</p>
+            <p>{{selectedCustomer.country}}</p>
+          </div>
+          
+          <div class="customer-notes" *ngIf="selectedCustomer.notes">
+            <h4>Notes</h4>
+            <p>{{selectedCustomer.notes}}</p>
+          </div>
+        </div>
+        
+        <div class="modal-actions">
+          <button class="btn btn-secondary" (click)="closeCustomerModal()">Close</button>
+          <button class="btn btn-primary" (click)="editCustomer(selectedCustomer!.id)">
+            <i class="fas fa-edit"></i>
+            Edit Customer
+          </button>
+          <button class="btn btn-secondary" (click)="printCustomer()">
+            <i class="fas fa-print"></i>
+            Print
+          </button>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>
