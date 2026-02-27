@@ -1,128 +1,259 @@
-<div class="notifications-page">
-  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
-  
-  <div class="notifications-main" [class.sidebar-collapsed]="sidebarCollapsed">
-    <!-- Header -->
-    <div class="notifications-header">
-      <h1>Notifications</h1>
-      <div class="header-actions">
-        <button class="btn btn-outline" (click)="markAllAsRead()" [disabled]="markAllLoading">
-          <i class="fas fa-check-double"></i>
-          <span *ngIf="!markAllLoading">Mark All Read</span>
-          <span *ngIf="markAllLoading">
-            <i class="fas fa-spinner fa-spin"></i> Marking...
+<div class="min-h-screen bg-gray-50 flex">
+
+  <!-- Sidebar -->
+  <app-sidebar
+    [navItems]="navItems"
+    [collapsed]="sidebarCollapsed">
+  </app-sidebar>
+
+  <!-- Main -->
+  <div class="flex-1 p-6 lg:p-10">
+
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center
+                border-b pb-6 mb-8 gap-4">
+
+      <h1 class="text-3xl font-bold text-gray-800">
+        Notifications
+      </h1>
+
+      <div class="flex flex-wrap gap-3">
+
+        <button
+          (click)="markAllAsRead()"
+          [disabled]="markAllLoading"
+          class="px-5 py-3 border border-orange-500
+                 text-orange-500 rounded-2xl
+                 font-semibold hover:bg-orange-500
+                 hover:text-white transition
+                 disabled:opacity-50">
+
+          <span *ngIf="!markAllLoading">
+            <i class="fas fa-check-double mr-2"></i>
+            Mark All Read
           </span>
+
+          <span *ngIf="markAllLoading">
+            <i class="fas fa-spinner fa-spin mr-2"></i>
+            Marking...
+          </span>
+
         </button>
-        <button class="btn btn-danger" (click)="clearAllNotifications()">
-          <i class="fas fa-trash"></i> Clear All
+
+        <button
+          (click)="clearAllNotifications()"
+          class="px-5 py-3 bg-red-500
+                 hover:bg-red-600 text-white
+                 rounded-2xl font-semibold transition">
+
+          <i class="fas fa-trash mr-2"></i>
+          Clear All
         </button>
+
       </div>
     </div>
 
-    <!-- Filters -->
-    <div class="filters-section">
-      <form [formGroup]="filterForm" class="filters-form">
-        <div class="filter-group">
-          <input type="text" formControlName="search" class="form-control" placeholder="Search notifications...">
-        </div>
-        
-        <div class="filter-group">
-          <select formControlName="type" class="form-control">
-            <option value="all">All Notifications</option>
-            <option value="unread">Unread</option>
-            <option value="read">Read</option>
-            <option value="order">Orders</option>
-            <option value="offer">Offers</option>
-            <option value="price_drop">Price Drops</option>
-            <option value="system">System</option>
-          </select>
-        </div>
+    <!-- FILTERS -->
+    <div class="bg-white rounded-2xl shadow-md p-6 mb-8">
+
+      <form [formGroup]="filterForm"
+            class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <input
+          type="text"
+          formControlName="search"
+          placeholder="Search notifications..."
+          class="border border-gray-300 rounded-xl
+                 px-4 py-3 focus:outline-none
+                 focus:ring-2 focus:ring-orange-400">
+
+        <select
+          formControlName="type"
+          class="border border-gray-300 rounded-xl
+                 px-4 py-3 focus:outline-none
+                 focus:ring-2 focus:ring-orange-400">
+
+          <option value="all">All Notifications</option>
+          <option value="unread">Unread</option>
+          <option value="read">Read</option>
+          <option value="order">Orders</option>
+          <option value="offer">Offers</option>
+          <option value="price_drop">Price Drops</option>
+          <option value="system">System</option>
+
+        </select>
+
       </form>
     </div>
 
-    <!-- Loading State -->
-    <div *ngIf="loading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading notifications...</p>
+    <!-- LOADING -->
+    <div *ngIf="loading"
+         class="flex flex-col items-center py-20 text-orange-500">
+
+      <i class="fas fa-spinner fa-spin text-3xl"></i>
+      <p class="mt-4 text-gray-500">Loading notifications...</p>
+
     </div>
 
-    <!-- Notifications List -->
-    <div *ngIf="!loading" class="notifications-content">
-      <div *ngIf="filteredNotifications.length === 0" class="empty-notifications">
-        <i class="far fa-bell"></i>
-        <h3>No notifications</h3>
-        <p>{{filterForm.value.search ? 'No notifications match your search criteria.' : 'You\'re all caught up! No new notifications.'}}</p>
+    <!-- CONTENT -->
+    <div *ngIf="!loading">
+
+      <!-- EMPTY STATE -->
+      <div *ngIf="filteredNotifications.length === 0"
+           class="flex flex-col items-center py-24 text-center">
+
+        <i class="far fa-bell text-6xl text-gray-300 mb-6"></i>
+
+        <h3 class="text-xl font-semibold mb-2">
+          No notifications
+        </h3>
+
+        <p class="text-gray-500">
+          {{filterForm.value.search
+            ? 'No notifications match your search.'
+            : 'You’re all caught up!'}}
+        </p>
+
       </div>
 
-      <div *ngIf="filteredNotifications.length > 0" class="notifications-list">
-        <div *ngFor="let notification of filteredNotifications" class="notification-item" 
-             [class.unread]="!notification.read" 
-             (click)="markAsRead(notification.id)">
-          <div class="notification-icon" [style.background-color]="getNotificationColor(notification.type)">
+      <!-- LIST -->
+      <div *ngIf="filteredNotifications.length > 0"
+           class="space-y-5">
+
+        <div *ngFor="let notification of filteredNotifications"
+             (click)="markAsRead(notification.id)"
+             class="bg-white rounded-2xl shadow-sm
+                    p-6 flex gap-5 cursor-pointer
+                    hover:shadow-md transition
+                    border-l-4"
+             [ngClass]="notification.read
+                        ? 'border-transparent'
+                        : 'border-orange-500 bg-orange-50'">
+
+          <!-- ICON -->
+          <div
+            class="w-12 h-12 rounded-full
+                   flex items-center justify-center
+                   text-white shrink-0"
+            [style.backgroundColor]="getNotificationColor(notification.type)">
+
             <i [class]="getNotificationIcon(notification.type)"></i>
           </div>
-          
-          <div class="notification-content">
-            <div class="notification-header">
-              <h3>{{notification.title}}</h3>
-              <div class="notification-meta">
-                <span class="notification-date">{{formatDate(notification.date)}}</span>
-                <button class="delete-btn" (click)="deleteNotification(notification.id); $event.stopPropagation()">
+
+          <!-- CONTENT -->
+          <div class="flex-1 space-y-2">
+
+            <div class="flex justify-between items-start">
+
+              <h3 class="font-semibold text-lg"
+                  [ngClass]="!notification.read ? 'text-orange-600' : 'text-gray-800'">
+
+                {{notification.title}}
+
+              </h3>
+
+              <div class="flex items-center gap-3">
+
+                <span class="text-sm text-gray-500">
+                  {{formatDate(notification.date)}}
+                </span>
+
+                <button
+                  (click)="deleteNotification(notification.id); $event.stopPropagation()"
+                  class="text-gray-400 hover:text-red-500 transition">
+
                   <i class="fas fa-times"></i>
                 </button>
+
               </div>
             </div>
-            
-            <p class="notification-message">{{notification.message}}</p>
-            
-            <!-- Order-specific details -->
-            <div *ngIf="notification.type === 'order' && notification.metadata?.orderId" class="notification-details">
-              <div class="detail-item">
-                <span class="detail-label">Order ID:</span>
-                <span class="detail-value">{{notification.metadata?.orderId}}</span>
-              </div>
-            </div>
-            
-            <!-- Offer-specific details -->
-            <div *ngIf="notification.type === 'offer' && notification.metadata?.discount" class="notification-details">
-              <div class="detail-item">
-                <span class="detail-label">Discount:</span>
-                <span class="detail-value discount">{{notification.metadata?.discount}}% OFF</span>
-              </div>
-            </div>
-            
-            <!-- Price drop-specific details -->
-            <div *ngIf="notification.type === 'price_drop' && notification.metadata?.oldPrice && notification.metadata?.newPrice" class="notification-details">
-              <div class="detail-item">
-                <span class="detail-label">Price Drop:</span>
-                <span class="detail-value">
-                  <span class="old-price">${{notification.metadata?.oldPrice}}</span>
-                  <span class="new-price">${{notification.metadata?.newPrice}}</span>
+
+            <p class="text-gray-600"
+               [ngClass]="!notification.read ? 'font-medium text-gray-800' : ''">
+
+              {{notification.message}}
+
+            </p>
+
+            <!-- DETAILS -->
+            <div *ngIf="notification.metadata"
+                 class="flex flex-wrap gap-3 mt-2">
+
+              <div *ngIf="notification.metadata?.orderId"
+                   class="px-4 py-2 bg-gray-100 rounded-full text-sm">
+
+                Order ID:
+                <span class="font-semibold">
+                  {{notification.metadata?.orderId}}
                 </span>
               </div>
+
+              <div *ngIf="notification.metadata?.discount"
+                   class="px-4 py-2 bg-green-100 text-green-600
+                          rounded-full text-sm font-semibold">
+
+                {{notification.metadata?.discount}}% OFF
+              </div>
+
+              <div *ngIf="notification.metadata?.oldPrice && notification.metadata?.newPrice"
+                   class="px-4 py-2 bg-gray-100 rounded-full text-sm">
+
+                <span class="line-through text-gray-400 mr-2">
+                  ${{notification.metadata?.oldPrice}}
+                </span>
+
+                <span class="text-green-600 font-semibold">
+                  ${{notification.metadata?.newPrice}}
+                </span>
+              </div>
+
             </div>
-            
-            <!-- Action Button -->
-            <div *ngIf="notification.actionText" class="notification-action">
-              <button class="btn btn-primary action-btn" (click)="takeAction(notification); $event.stopPropagation()">
+
+            <!-- ACTION -->
+            <div *ngIf="notification.actionText" class="mt-3">
+
+              <button
+                (click)="takeAction(notification); $event.stopPropagation()"
+                class="px-4 py-2 bg-orange-500
+                       hover:bg-orange-600
+                       text-white rounded-xl
+                       text-sm font-semibold transition">
+
                 {{notification.actionText}}
+
               </button>
+
             </div>
+
           </div>
         </div>
       </div>
     </div>
 
-    <!-- Notification Stats -->
-    <div *ngIf="!loading && notifications.length > 0" class="notification-stats">
-      <div class="stat-item">
-        <span class="stat-number">{{getUnreadCount()}}</span>
-        <span class="stat-label">Unread</span>
+    <!-- STATS -->
+    <div *ngIf="!loading && notifications.length > 0"
+         class="mt-10 bg-white rounded-2xl shadow-md
+                p-6 flex justify-center gap-16">
+
+      <div class="text-center">
+        <div class="text-3xl font-bold text-orange-600">
+          {{getUnreadCount()}}
+        </div>
+        <div class="text-gray-500 text-sm uppercase tracking-wide">
+          Unread
+        </div>
       </div>
-      <div class="stat-item">
-        <span class="stat-number">{{notifications.length}}</span>
-        <span class="stat-label">Total</span>
+
+      <div class="text-center">
+        <div class="text-3xl font-bold text-orange-600">
+          {{notifications.length}}
+        </div>
+        <div class="text-gray-500 text-sm uppercase tracking-wide">
+          Total
+        </div>
       </div>
+
     </div>
+
   </div>
 </div>
