@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
+
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
+import { Navbar } from '../../../shared/components/navbar/navbar';
 
 interface Notification {
   id: number;
@@ -27,7 +28,7 @@ interface Notification {
 
 @Component({
   selector: 'app-notifications',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Sidebar],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar],
   templateUrl: './notifications.html',
   styleUrl: './notifications.css'
 })
@@ -66,7 +67,9 @@ export class Notifications implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadNotifications();
+    // this.loadNotifications();
+     this.notifications = this.generateMockNotifications();
+        this.filteredNotifications = this.notifications;
     
     // Listen to filter changes
     this.filterForm.valueChanges.subscribe(() => {

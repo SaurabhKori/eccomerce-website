@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
+
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
+import { Navbar } from '../../../shared/components/navbar/navbar';
 
 // Import Math for template usage
 declare var Math: any;
@@ -33,7 +34,7 @@ interface ProductReview {
 
 @Component({
   selector: 'app-reviews',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Sidebar],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar],
   templateUrl: './reviews.html',
   styleUrl: './reviews.css'
 })
@@ -87,9 +88,12 @@ export class Reviews implements OnInit {
   ngOnInit(): void {
     this.productId = this.route.snapshot.paramMap.get('id');
     if (this.productId) {
-      this.loadProductReviews(parseInt(this.productId));
+      // this.loadProductReviews(parseInt(this.productId));
+         const mockData = this.generateMockProductReviews(parseInt(this.productId));
+        this.product = mockData.product;
+        this.reviews = mockData.reviews;
     } else {
-      this.loadAllReviews();
+      this.reviews = this.generateMockUserReviews();
     }
     
     // Listen to filter changes
@@ -115,9 +119,7 @@ export class Reviews implements OnInit {
       error: (error) => {
         console.error('Error loading reviews:', error);
         this.loading = false;
-        const mockData = this.generateMockProductReviews(productId);
-        this.product = mockData.product;
-        this.reviews = mockData.reviews;
+     
       }
     });
   }

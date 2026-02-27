@@ -58,7 +58,8 @@ export class OrderSuccess implements OnInit {
   ngOnInit(): void {
     this.orderId = this.route.snapshot.queryParamMap.get('orderId');
     if (this.orderId) {
-      this.loadOrderDetails(this.orderId);
+      // this.loadOrderDetails(this.orderId);
+      this.orderDetails = this.generateMockOrderDetails(this.orderId);
     } else {
       // Generate a mock order ID for demo purposes
       this.orderId = 'ORD-' + Math.random().toString(36).substr(2, 9).toUpperCase();

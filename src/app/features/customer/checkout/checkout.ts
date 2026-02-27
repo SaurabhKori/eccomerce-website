@@ -245,6 +245,9 @@ export class Checkout implements OnInit {
 
   // Place Order
   placeOrder(): void {
+    this.router.navigate(['/order-success'], { 
+          queryParams: { orderId: 1 } 
+        });
     if (!this.validateCurrentStep()) return;
 
     this.loading = true;
@@ -261,20 +264,23 @@ export class Checkout implements OnInit {
       items: this.cartItems,
       summary: this.orderSummary
     };
-
-    this.http.post('/api/orders', orderData).subscribe({
-      next: (response: any) => {
-        this.loading = false;
-        this.router.navigate(['/order-success'], { 
-          queryParams: { orderId: response.orderId } 
+     this.router.navigate(['/order-success'], { 
+          queryParams: { orderId: 1 } 
         });
-      },
-      error: (error) => {
-        console.error('Error placing order:', error);
-        this.loading = false;
-        alert('Failed to place order. Please try again.');
-      }
-    });
+
+    // this.http.post('/api/orders', orderData).subscribe({
+    //   next: (response: any) => {
+    //     this.loading = false;
+    //     this.router.navigate(['/order-success'], { 
+    //       queryParams: { orderId: response.orderId } 
+    //     });
+    //   },
+    //   error: (error) => {
+    //     console.error('Error placing order:', error);
+    //     this.loading = false;
+    //     alert('Failed to place order. Please try again.');
+    //   }
+    // });
   }
 
   // Utility Methods
