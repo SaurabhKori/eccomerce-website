@@ -1,46 +1,129 @@
-<div class="product-card" [class.compact]="compact" (click)="onProductClick()">
-  <div class="product-image">
-    <img [src]="product.image" [alt]="product.name">
-    <div class="product-badges">
-      <span class="badge badge-featured" *ngIf="product.featured">Featured</span>
-      <span class="badge badge-discount" *ngIf="product.discount">
-        -{{getDiscountPercentage()}}%
-      </span>
-      <span class="badge badge-top-rated" *ngIf="product.topRated">Top Rated</span>
+<ui-card class="group relative cursor-pointer overflow-hidden">
+
+  <!-- IMAGE SECTION -->
+  <div class="relative overflow-hidden rounded-xl">
+
+    <img
+      [src]="product.image"
+      [alt]="product.name"
+      class="w-full h-56 object-cover transition duration-500 transform group-hover:scale-110" />
+
+    <!-- HOVER OVERLAY -->
+    <div
+      class="absolute inset-0 bg-black bg-opacity-40 flex items-center justify-center
+             opacity-0 group-hover:opacity-100 transition duration-300">
+
+      <ui-button
+        variant="secondary"
+        size="sm"
+        (click)="onQuickView($event)">
+        Quick View
+      </ui-button>
+
     </div>
-    <div class="product-actions" *ngIf="showActions">
-      <button class="action-btn wishlist" (click)="onAddToWishlist($event)">
-        <i class="far fa-heart"></i>
-      </button>
-      <button class="action-btn quick-view" (click)="onQuickView($event)">
-        <i class="fas fa-eye"></i>
-      </button>
+
+    <!-- BADGES -->
+    <div class="absolute top-3 left-3 flex flex-col gap-2">
+
+      <ui-badge *ngIf="product.featured" variant="primary">
+        Featured
+      </ui-badge>
+
+      <ui-badge *ngIf="product.originalPrice" variant="danger">
+        -{{ getDiscountPercentage() }}%
+      </ui-badge>
+
+      <ui-badge *ngIf="product.topRated" variant="success">
+        Top Rated
+      </ui-badge>
+
+      <!-- STOCK STATUS -->
+      <ui-badge
+        *ngIf="product.stock !== undefined"
+        [variant]="product.stock > 0 ? 'success' : 'danger'">
+
+        {{ product.stock > 0 ? 'In Stock' : 'Out of Stock' }}
+
+      </ui-badge>
+
     </div>
+
+    <!-- WISHLIST -->
+    <div
+      class="absolute top-3 right-3 opacity-0 group-hover:opacity-100 transition">
+
+      <button
+        (click)="onAddToWishlist($event)"
+        class="bg-white p-2 rounded-full shadow transition duration-300"
+        [ngClass]="{
+          'text-red-500 scale-125': product.wishlisted,
+          'text-gray-400': !product.wishlisted
+        }">
+        <i class="fas fa-heart"></i>
+      </button>
+
+    </div>
+
   </div>
-  
-  <div class="product-info">
-    <h3 class="product-name">{{product.name}}</h3>
-    <div class="product-rating">
-      <div class="stars">
-        <i class="fas fa-star" *ngFor="let star of getRatingStars(product.rating)"></i>
-        <i class="far fa-star" *ngFor="let star of createArray(5 - product.rating)"></i>
+
+  <!-- INFO -->
+  <div class="p-4">
+
+    <h3 class="text-lg font-semibold mb-1 line-clamp-1">
+      {{ product.name }}
+    </h3>
+
+    <!-- RATING -->
+    <div class="flex items-center mb-2">
+      <div class="flex text-yellow-400 text-sm">
+        <i class="fas fa-star" *ngFor="let star of getFullStars()"></i>
+        <i class="fas fa-star-half-alt" *ngIf="hasHalfStar()"></i>
+        <i class="far fa-star" *ngFor="let star of getEmptyStars()"></i>
       </div>
-      <span class="rating-count">({{product.reviews}})</span>
-    </div>
-    <div class="product-price">
-      <span class="current-price">{{formatCurrency(product.price)}}</span>
-      <span class="original-price" *ngIf="product.originalPrice">
-        {{formatCurrency(product.originalPrice)}}
+      <span class="text-xs text-gray-500 ml-2">
+        ({{ product.reviews }})
       </span>
     </div>
-    <div class="product-brand" *ngIf="!compact">
-      <span class="brand-name">{{product.brand}}</span>
+
+    <!-- PRICE -->
+    <div class="flex items-center gap-2 mb-3">
+      <span class="text-lg font-bold text-orange-600">
+        {{ formatCurrency(product.price) }}
+      </span>
+
+      <span *ngIf="product.originalPrice"
+            class="text-sm text-gray-400 line-through">
+        {{ formatCurrency(product.originalPrice) }}
+      </span>
     </div>
+
+    <!-- BUTTONS -->
+    <div class="flex gap-2">
+
+      <ui-button
+        variant="primary"
+        size="sm"
+        class="flex-1"
+        (click)="onAddToCart($event)">
+        Add to Cart
+      </ui-button>
+
+      <ui-button
+        variant="secondary"
+        size="sm"
+        class="flex-1"
+        (click)="onBuyNow($event)">
+        Buy Now
+      </ui-button>
+
+    </div>
+
   </div>
-  
-  <div class="product-footer" *ngIf="showActions && !compact">
-    <button class="btn btn-primary add-to-cart" (click)="onAddToCart($event)">
-      <i class="fas fa-shopping-cart"></i> Add to Cart
-    </button>
-  </div>
-</div>
+
+</ui-card>
+
+<app-quick-view
+  *ngIf="showQuickView"
+  [product]="product"
+  (close)="showQuickView = false">
+</app-quick-view>

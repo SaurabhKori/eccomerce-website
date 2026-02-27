@@ -1,62 +1,156 @@
-<footer class="main-footer">
-  <div class="footer-content">
-    <div class="footer-section">
-      <h3>Shop</h3>
-      <ul class="footer-links">
-        <li><a href="/products">All Products</a></li>
-        <li><a href="/categories">Categories</a></li>
-        <li><a href="/deals">Special Deals</a></li>
-        <li><a href="/brands">Brands</a></li>
-      </ul>
-    </div>
-    
-    <div class="footer-section">
-      <h3>Customer Service</h3>
-      <ul class="footer-links">
-        <li><a href="/contact">Contact Us</a></li>
-        <li><a href="/shipping">Shipping Info</a></li>
-        <li><a href="/returns">Returns</a></li>
-        <li><a href="/faq">FAQ</a></li>
-      </ul>
-    </div>
-    
-    <div class="footer-section">
-      <h3>About</h3>
-      <ul class="footer-links">
-        <li><a href="/about">About Us</a></li>
-        <li><a href="/careers">Careers</a></li>
-        <li><a href="/press">Press</a></li>
-        <li><a href="/sustainability">Sustainability</a></li>
-      </ul>
-    </div>
-    
-    <div class="footer-section">
-      <h3>Connect</h3>
-      <div class="social-links">
-        <a *ngFor="let social of socialLinks" [href]="social.url" class="social-link" [title]="social.name">
-          <i [class]="social.icon"></i>
-        </a>
+<footer class="bg-gray-900 text-gray-300 pt-16 pb-10 mt-16">
+
+  <div class="max-w-7xl mx-auto px-6">
+
+    <!-- TOP SECTION -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-10">
+
+      <!-- SHOP -->
+      <div>
+        <h3 class="text-white font-semibold text-lg mb-4">
+          Shop
+        </h3>
+
+        <ul class="space-y-3">
+          <li><a href="/products"
+                 class="hover:text-orange-500 transition">
+              All Products
+          </a></li>
+          <li><a href="/categories"
+                 class="hover:text-orange-500 transition">
+              Categories
+          </a></li>
+          <li><a href="/deals"
+                 class="hover:text-orange-500 transition">
+              Special Deals
+          </a></li>
+          <li><a href="/brands"
+                 class="hover:text-orange-500 transition">
+              Brands
+          </a></li>
+        </ul>
       </div>
-      <div class="newsletter">
-        <h4>Subscribe to our newsletter</h4>
-        <div class="newsletter-form">
-          <input type="email" placeholder="Enter your email" class="newsletter-input">
-          <button class="newsletter-btn">Subscribe</button>
+
+      <!-- CUSTOMER SERVICE -->
+      <div>
+        <h3 class="text-white font-semibold text-lg mb-4">
+          Customer Service
+        </h3>
+
+        <ul class="space-y-3">
+          <li><a href="/contact"
+                 class="hover:text-orange-500 transition">
+              Contact Us
+          </a></li>
+          <li><a href="/shipping"
+                 class="hover:text-orange-500 transition">
+              Shipping Info
+          </a></li>
+          <li><a href="/returns"
+                 class="hover:text-orange-500 transition">
+              Returns
+          </a></li>
+          <li><a href="/faq"
+                 class="hover:text-orange-500 transition">
+              FAQ
+          </a></li>
+        </ul>
+      </div>
+
+      <!-- ABOUT -->
+      <div>
+        <h3 class="text-white font-semibold text-lg mb-4">
+          About
+        </h3>
+
+        <ul class="space-y-3">
+          <li><a href="/about"
+                 class="hover:text-orange-500 transition">
+              About Us
+          </a></li>
+          <li><a href="/careers"
+                 class="hover:text-orange-500 transition">
+              Careers
+          </a></li>
+          <li><a href="/press"
+                 class="hover:text-orange-500 transition">
+              Press
+          </a></li>
+          <li><a href="/sustainability"
+                 class="hover:text-orange-500 transition">
+              Sustainability
+          </a></li>
+        </ul>
+      </div>
+
+      <!-- CONNECT -->
+      <div>
+        <h3 class="text-white font-semibold text-lg mb-4">
+          Connect
+        </h3>
+
+        <!-- SOCIAL ICONS -->
+        <div class="flex gap-4 mb-6">
+          <a *ngFor="let social of socialLinks"
+             [href]="social.url"
+             class="w-10 h-10 flex items-center justify-center
+                    rounded-full bg-gray-800
+                    hover:bg-orange-500 hover:text-white
+                    transition">
+            <i [class]="social.icon"></i>
+          </a>
         </div>
+
+        <!-- NEWSLETTER -->
+        <div>
+          <h4 class="text-sm text-white font-semibold mb-3">
+            Subscribe to our newsletter
+          </h4>
+
+          <div class="flex flex-col sm:flex-row gap-3">
+
+            <input type="email"
+                   placeholder="Enter your email"
+                   class="flex-1 px-4 py-3 rounded-2xl
+                          bg-gray-800 border border-gray-700
+                          text-white placeholder-gray-400
+                          focus:outline-none focus:ring-2
+                          focus:ring-orange-500">
+
+            <button
+              class="px-5 py-3 bg-orange-500
+                     hover:bg-orange-600
+                     rounded-2xl text-white
+                     font-semibold transition">
+              Subscribe
+            </button>
+
+          </div>
+        </div>
+
       </div>
+
     </div>
+
+    <!-- BOTTOM SECTION -->
+    <div class="border-t border-gray-800 mt-12 pt-8
+                flex flex-col md:flex-row
+                justify-between items-center gap-6">
+
+      <div class="text-sm text-gray-400">
+        &copy; {{currentYear}} {{companyName}}. All rights reserved.
+      </div>
+
+      <div class="flex items-center gap-4 text-gray-400 text-xl">
+        <span class="text-xs mr-2">We accept:</span>
+        <i class="fab fa-cc-visa hover:text-orange-500 transition"></i>
+        <i class="fab fa-cc-mastercard hover:text-orange-500 transition"></i>
+        <i class="fab fa-cc-amex hover:text-orange-500 transition"></i>
+        <i class="fab fa-cc-paypal hover:text-orange-500 transition"></i>
+      </div>
+
+    </div>
+
   </div>
-  
-  <div class="footer-bottom">
-    <div class="footer-copyright">
-      <p>&copy; {{currentYear}} {{companyName}}. All rights reserved.</p>
-    </div>
-    <div class="footer-payments">
-      <span>We accept:</span>
-      <i class="fab fa-cc-visa"></i>
-      <i class="fab fa-cc-mastercard"></i>
-      <i class="fab fa-cc-amex"></i>
-      <i class="fab fa-cc-paypal"></i>
-    </div>
-  </div>
+
 </footer>

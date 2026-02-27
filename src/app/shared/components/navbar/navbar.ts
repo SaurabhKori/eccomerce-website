@@ -1,51 +1,47 @@
-import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Component, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { Router } from '@angular/router';
-
-export interface NavItem {
-  path: string;
-  label: string;
-  icon?: string;
-}
+import { Router, RouterLink } from '@angular/router';
+import { AuthService } from '../../../services/auth.service';
 
 @Component({
   selector: 'app-navbar',
   standalone: true,
-  imports: [CommonModule],
-  templateUrl: './navbar.html',
-  styleUrl: './navbar.css'
+  imports: [CommonModule,RouterLink],
+  templateUrl: './navbar.html'
 })
 export class Navbar {
+
   @Input() cartItems = 0;
-  @Input() userName = 'John Doe';
-  @Input() userAvatar = 'https://via.placeholder.com/32x32?text=User';
-  @Input() showMobileMenu = false;
-  
-  @Output() search = new EventEmitter<string>();
-  @Output() toggleMobileMenu = new EventEmitter<void>();
-  @Output() userMenuClick = new EventEmitter<void>();
+  @Input() userName = 'User';
+  @Input() userAvatar = 'https://via.placeholder.com/32x32?text=U';
 
-  constructor(private router: Router) {}
+  showDropdown = false;
 
-  onSearch(event: any): void {
-    const searchTerm = event.target.value;
-    this.search.emit(searchTerm);
-  }
+  constructor(
+    private router: Router,
+    private authService: AuthService
+  ) {}
 
-  onSearchSubmit(searchInput: HTMLInputElement): void {
-    const searchTerm = searchInput.value;
-    this.search.emit(searchTerm);
-  }
-
-  navigateTo(path: string): void {
+  navigateTo(path: string) {
     this.router.navigate([path]);
+    this.showDropdown = false;
   }
 
-  toggleMenu(): void {
-    this.toggleMobileMenu.emit();
+  toggleDropdown() {
+    this.showDropdown = !this.showDropdown;
   }
 
-  onUserMenu(): void {
-    this.userMenuClick.emit();
+  logout() {
+    this.authService.clearToken();
+    this.router.navigate(['/login']);
+  }
+
+  onSearchSubmit(input: HTMLInputElement) {
+    const value = input.value.trim();
+    if (value) {
+      this.router.navigate(['/products'], {
+        queryParams: { search: value }
+      });
+    }
   }
 }

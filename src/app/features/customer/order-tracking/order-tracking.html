@@ -1,149 +1,219 @@
-<div class="order-tracking-page">
-  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
-  
-  <div class="tracking-main" [class.sidebar-collapsed]="sidebarCollapsed">
-    <!-- Header -->
-    <div class="tracking-header">
-      <button class="btn btn-outline back-btn" (click)="goBack()">
-        <i class="fas fa-arrow-left"></i> Back to Orders
+<div class="bg-gray-50 min-h-screen">
+
+  <app-navbar></app-navbar>
+
+  <div class="max-w-5xl mx-auto px-4 py-8">
+
+    <!-- ===== HEADER ===== -->
+    <div class="flex items-center gap-4 mb-6">
+      <button
+        class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition"
+        (click)="goBack()">
+        <i class="fas fa-arrow-left mr-2"></i>
+        Back
       </button>
-      <h1>Order Tracking</h1>
+
+      <h1 class="text-2xl md:text-3xl font-bold text-gray-800">
+        Order Tracking
+      </h1>
     </div>
 
-    <div *ngIf="loading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading tracking information...</p>
+    <!-- ===== LOADING ===== -->
+    <div *ngIf="loading"
+         class="flex flex-col items-center py-16">
+      <div class="w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mb-4"></div>
+      <p class="text-gray-500">Loading tracking information...</p>
     </div>
 
-    <div *ngIf="!loading && orderDetails" class="tracking-content">
-      <!-- Order Info Card -->
-      <div class="order-info-card">
-        <div class="order-header">
-          <div class="order-number">
-            <h3>Order #{{orderDetails.id}}</h3>
-            <span class="status-badge status-shipped">{{orderDetails.status}}</span>
+    <!-- ===== CONTENT ===== -->
+    <div *ngIf="!loading && orderDetails">
+
+      <!-- ===== ORDER SUMMARY CARD ===== -->
+      <div class="bg-white rounded-2xl shadow-md p-6 mb-8">
+
+        <div class="flex flex-col md:flex-row md:justify-between gap-6">
+
+          <div>
+            <h2 class="text-xl font-bold text-gray-800">
+              Order #{{orderDetails.id}}
+            </h2>
+
+            <p class="text-gray-500 mt-1">
+              Placed on {{formatDate(orderDetails.orderDate)}}
+            </p>
+
+            <p class="text-sm text-gray-500 mt-2">
+              Tracking #: {{orderDetails.trackingNumber}}
+            </p>
           </div>
-          <div class="tracking-number">
-            <i class="fas fa-barcode"></i>
-            <div>
-              <div class="label">Tracking Number</div>
-              <div class="value">{{orderDetails.trackingNumber}}</div>
-            </div>
+
+          <div>
+            <span class="px-4 py-1 rounded-full text-sm font-semibold"
+                  [ngClass]="getStatusColor(orderDetails.status)">
+              {{orderDetails.status}}
+            </span>
+
+            <p class="text-sm text-gray-500 mt-2">
+              Estimated Delivery:
+              {{formatDate(orderDetails.estimatedDelivery)}
+            </p>
           </div>
+
         </div>
 
-        <div class="order-details">
-          <div class="detail-item">
-            <i class="fas fa-truck"></i>
-            <div>
-              <div class="label">Courier</div>
-              <div class="value">{{orderDetails.courier}}</div>
-            </div>
-          </div>
-          <div class="detail-item">
-            <i class="fas fa-map-marker-alt"></i>
-            <div>
-              <div class="label">Current Location</div>
-              <div class="value">{{orderDetails.currentLocation}}</div>
-            </div>
-          </div>
-          <div class="detail-item">
-            <i class="fas fa-calendar"></i>
-            <div>
-              <div class="label">Estimated Delivery</div>
-              <div class="value">{{formatDate(orderDetails.estimatedDelivery)}}</div>
-            </div>
-          </div>
-        </div>
-      </div>
+        <!-- Courier + Location -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mt-6">
 
-      <!-- Tracking Timeline -->
-      <div class="tracking-timeline">
-        <h2>Tracking History</h2>
-        <div class="timeline">
-          <div *ngFor="let step of trackingSteps; let i = index" class="timeline-item" 
-               [class.completed]="step.completed" [class.current]="step.current">
-            <div class="timeline-marker">
-              <div class="marker-dot"></div>
-              <div class="marker-line" *ngIf="i < trackingSteps.length - 1"></div>
-            </div>
-            <div class="timeline-content">
-              <div class="timeline-header">
-                <h3>{{step.title}}</h3>
-                <div class="timeline-date">
-                  <span class="date">{{formatDate(step.date)}}</span>
-                  <span class="time">{{formatTime(step.time)}}</span>
-                </div>
+          <div class="flex items-center gap-3">
+            <i class="fas fa-truck text-orange-500 text-xl"></i>
+            <div>
+              <div class="text-sm text-gray-500">Courier</div>
+              <div class="font-semibold text-gray-800">
+                {{orderDetails.courier}}
               </div>
-              <p class="timeline-description">{{step.description}}</p>
             </div>
           </div>
+
+          <div class="flex items-center gap-3">
+            <i class="fas fa-map-marker-alt text-orange-500 text-xl"></i>
+            <div>
+              <div class="text-sm text-gray-500">Current Location</div>
+              <div class="font-semibold text-gray-800">
+                {{orderDetails.currentLocation}}
+              </div>
+            </div>
+          </div>
+
         </div>
       </div>
 
-      <!-- Order Items -->
-      <div class="order-items-section">
-        <h2>Order Items</h2>
-        <div class="order-items">
-          <div *ngFor="let item of orderDetails.items" class="order-item">
-            <img [src]="item.image" [alt]="item.name" class="item-image">
-            <div class="item-details">
-              <div class="item-name">{{item.name}}</div>
-              <div class="item-quantity">Quantity: {{item.quantity}}</div>
+      <!-- ===== TIMELINE ===== -->
+      <div class="bg-white rounded-2xl shadow-md p-6 mb-8">
+
+        <h2 class="text-xl font-bold mb-6">Tracking History</h2>
+
+        <div class="relative">
+
+          <div *ngFor="let step of trackingSteps; let i = index"
+               class="flex gap-6 mb-8">
+
+            <!-- Marker -->
+            <div class="flex flex-col items-center">
+
+              <div
+                class="w-5 h-5 rounded-full"
+                [ngClass]="{
+                  'bg-green-500': step.completed,
+                  'bg-orange-500': step.current,
+                  'bg-gray-300': !step.completed && !step.current
+                }">
+              </div>
+
+              <div *ngIf="i < trackingSteps.length - 1"
+                   class="w-1 h-16"
+                   [ngClass]="{
+                     'bg-green-400': step.completed,
+                     'bg-gray-200': !step.completed
+                   }">
+              </div>
+
             </div>
+
+            <!-- Content -->
+            <div class="flex-1">
+
+              <div class="flex flex-col md:flex-row md:justify-between">
+
+                <h3 class="font-semibold text-gray-800">
+                  {{step.title}}
+                </h3>
+
+                <div class="text-sm text-gray-500">
+                  {{formatDate(step.date)}} |
+                  {{formatTime(step.time)}}
+                </div>
+
+              </div>
+
+              <p class="text-gray-600 text-sm mt-1">
+                {{step.description}}
+              </p>
+
+            </div>
+
           </div>
+
         </div>
       </div>
 
-      <!-- Shipping Address -->
-      <div class="shipping-address-section">
-        <h2>Delivery Address</h2>
-        <div class="address-card">
-          <i class="fas fa-map-marker-alt"></i>
-          <div class="address-info">
-            <div class="address-name">{{orderDetails.shippingAddress.name}}</div>
-            <div class="address-street">{{orderDetails.shippingAddress.street}}</div>
-            <div class="address-city">
-              {{orderDetails.shippingAddress.city}}, {{orderDetails.shippingAddress.state}} {{orderDetails.shippingAddress.zipCode}}
+      <!-- ===== ORDER ITEMS ===== -->
+      <div class="bg-white rounded-2xl shadow-md p-6 mb-8">
+
+        <h2 class="text-xl font-bold mb-6">Order Items</h2>
+
+        <div class="space-y-4">
+
+          <div *ngFor="let item of orderDetails.items"
+               class="flex flex-col md:flex-row md:items-center gap-4">
+
+            <img [src]="item.image"
+                 class="w-20 h-20 rounded-lg object-cover border">
+
+            <div class="flex-1">
+              <div class="font-semibold text-gray-800">
+                {{item.name}}
+              </div>
+              <div class="text-sm text-gray-500">
+                Quantity: {{item.quantity}}
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ===== DELIVERY ADDRESS ===== -->
+      <div class="bg-white rounded-2xl shadow-md p-6 mb-8">
+
+        <h2 class="text-xl font-bold mb-4">Delivery Address</h2>
+
+        <div class="flex gap-3">
+          <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
+          <div>
+            <div class="font-semibold">
+              {{orderDetails.shippingAddress.name}}
+            </div>
+            <div class="text-sm text-gray-600">
+              {{orderDetails.shippingAddress.street}},
+              {{orderDetails.shippingAddress.city}},
+              {{orderDetails.shippingAddress.state}}
+              {{orderDetails.shippingAddress.zipCode}}
             </div>
           </div>
         </div>
+
       </div>
 
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button class="btn btn-primary" (click)="downloadInvoice()">
-          <i class="fas fa-download"></i> Download Invoice
+      <!-- ===== ACTION BUTTONS ===== -->
+      <div class="flex flex-wrap gap-4 mb-10">
+
+        <button
+          class="px-6 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+          (click)="downloadInvoice()">
+          Download Invoice
         </button>
-        <button class="btn btn-outline" (click)="contactSupport()">
-          <i class="fas fa-headset"></i> Contact Support
+
+        <button
+          class="px-6 py-2 border rounded-lg hover:bg-gray-100 transition"
+          (click)="contactSupport()">
+          Contact Support
         </button>
+
       </div>
 
-      <!-- Help Section -->
-      <div class="help-section">
-        <h3>Need Help?</h3>
-        <div class="help-cards">
-          <div class="help-card">
-            <i class="fas fa-phone"></i>
-            <h4>Call Support</h4>
-            <p>24/7 customer support available</p>
-            <a href="tel:1-800-123-4567" class="help-link">1-800-123-4567</a>
-          </div>
-          <div class="help-card">
-            <i class="fas fa-envelope"></i>
-            <h4>Email Support</h4>
-            <p>Get help via email within 24 hours</p>
-            <a href="mailto:support@ecommerce.com" class="help-link">support@ecommerce.com</a>
-          </div>
-          <div class="help-card">
-            <i class="fas fa-comments"></i>
-            <h4>Live Chat</h4>
-            <p>Chat with our support team</p>
-            <button class="help-link btn-link">Start Chat</button>
-          </div>
-        </div>
-      </div>
     </div>
+
   </div>
 </div>

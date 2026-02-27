@@ -2,8 +2,8 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
+import { Navbar } from '../../../shared/components/navbar/navbar';
 
 interface OrderDetails {
   id: string;
@@ -29,7 +29,7 @@ interface OrderDetails {
 
 @Component({
   selector: 'app-order-success',
-  imports: [CommonModule, Sidebar],
+  imports: [CommonModule, Navbar],
   templateUrl: './order-success.html',
   styleUrl: './order-success.css'
 })

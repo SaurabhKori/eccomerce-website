@@ -1,311 +1,212 @@
-<div class="profile-page">
-  <app-navbar></app-navbar>
-  
-  <div class="profile-container">
-    <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
-  
-  <div class="profile-main" [class.sidebar-collapsed]="sidebarCollapsed">
-    <!-- Header -->
-    <div class="profile-header">
-      <h1>My Profile</h1>
-      <button class="btn btn-danger logout-btn" (click)="logout()">
-        <i class="fas fa-sign-out-alt"></i> Logout
+<app-navbar></app-navbar>
+
+<div class="bg-gray-50 min-h-screen py-10">
+
+  <div class="max-w-6xl mx-auto px-4">
+
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row justify-between items-center mb-8 gap-4">
+
+      <h1 class="text-3xl font-bold text-gray-800">
+        My Profile
+      </h1>
+
+      <ui-button variant="danger" (click)="logout()">
+        <i class="fas fa-sign-out-alt mr-2"></i>
+        Logout
+      </ui-button>
+
+    </div>
+
+    <!-- TABS -->
+    <div class="flex flex-wrap gap-4 mb-8 border-b pb-3">
+
+      <button *ngFor="let tab of ['personal','addresses','payment','security']" (click)="switchTab(tab)"
+        class="px-4 py-2 rounded-lg font-medium transition" [ngClass]="{
+          'bg-orange-500 text-white': activeTab === tab,
+          'bg-white text-gray-600 hover:bg-orange-100': activeTab !== tab
+        }">
+
+        {{ tab | titlecase }}
+
       </button>
+
     </div>
 
-    <div *ngIf="loading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading profile...</p>
-    </div>
+    <!-- PERSONAL INFO -->
+    <ui-card *ngIf="activeTab === 'personal'">
 
-    <div *ngIf="!loading && userProfile" class="profile-content">
-      <!-- Profile Tabs -->
-      <div class="profile-tabs">
-        <button class="tab-btn" [class.active]="activeTab === 'personal'" (click)="switchTab('personal')">
-          <i class="fas fa-user"></i> Personal Info
-        </button>
-        <button class="tab-btn" [class.active]="activeTab === 'addresses'" (click)="switchTab('addresses')">
-          <i class="fas fa-map-marker-alt"></i> Addresses
-        </button>
-        <button class="tab-btn" [class.active]="activeTab === 'payment'" (click)="switchTab('payment')">
-          <i class="fas fa-credit-card"></i> Payment Methods
-        </button>
-        <button class="tab-btn" [class.active]="activeTab === 'security'" (click)="switchTab('security')">
-          <i class="fas fa-shield-alt"></i> Security
-        </button>
-      </div>
+      <div class="flex flex-col md:flex-row gap-8">
 
-      <!-- Personal Info Tab -->
-      <div class="tab-content" *ngIf="activeTab === 'personal'">
-        <div class="profile-overview">
-          <div class="avatar-section">
-            <img [src]="userProfile.avatar" [alt]="userProfile.firstName" class="user-avatar">
-            <button class="btn btn-outline change-avatar-btn">
-              <i class="fas fa-camera"></i> Change Photo
-            </button>
+        <!-- Avatar -->
+        <div class="flex flex-col items-center relative">
+
+          <!-- AVATAR -->
+          <div class="relative group">
+
+            <img [src]="previewImage || userProfile?.avatar"
+              class="w-36 h-36 rounded-full border-4 border-orange-500 object-cover transition duration-300 group-hover:opacity-80">
+
+            <!-- Overlay Camera Icon -->
+            <div class="absolute inset-0 flex items-center justify-center
+             bg-black bg-opacity-40 rounded-full opacity-0
+             group-hover:opacity-100 transition">
+
+              <i class="fas fa-camera text-white text-2xl"></i>
+
+            </div>
+
           </div>
-          
-          <div class="user-info">
-            <h2>{{userProfile.firstName}} {{userProfile.lastName}}</h2>
-            <p class="user-email">{{userProfile.email}}</p>
-            <p class="member-since">Member since {{formatDate(userProfile.joinDate)}}</p>
+
+          <!-- Hidden File Input -->
+          <input type="file" #fileInput accept="image/*" hidden (change)="onImageSelected($event)" />
+
+          <!-- Change Button -->
+          <ui-button variant="secondary" size="sm" class="mt-4" (click)="fileInput.click()">
+
+            Change Photo
+
+          </ui-button>
+
+        </div>
+
+        <!-- Info Form -->
+        <form [formGroup]="personalForm" (ngSubmit)="updatePersonalInfo()" class="flex-1 grid md:grid-cols-2 gap-6">
+
+          <ui-input label="First Name" formControlName="firstName">
+          </ui-input>
+
+          <ui-input label="Last Name" formControlName="lastName">
+          </ui-input>
+
+          <ui-input label="Email" type="email" formControlName="email">
+          </ui-input>
+
+          <ui-input label="Phone" formControlName="phone">
+          </ui-input>
+
+          <div class="md:col-span-2 flex justify-end">
+            <ui-button type="submit">
+              Save Changes
+            </ui-button>
           </div>
-        </div>
 
-        <div class="personal-form-section">
-          <h3>Personal Information</h3>
-          <form [formGroup]="personalForm" (ngSubmit)="updatePersonalInfo()">
-            <div class="form-row">
-              <div class="form-group">
-                <label>First Name *</label>
-                <input type="text" formControlName="firstName" class="form-control">
-                <div class="error" *ngIf="personalForm.get('firstName')?.invalid && personalForm.get('firstName')?.touched">
-                  First name is required
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Last Name *</label>
-                <input type="text" formControlName="lastName" class="form-control">
-                <div class="error" *ngIf="personalForm.get('lastName')?.invalid && personalForm.get('lastName')?.touched">
-                  Last name is required
-                </div>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label>Email Address *</label>
-              <input type="email" formControlName="email" class="form-control">
-              <div class="error" *ngIf="personalForm.get('email')?.invalid && personalForm.get('email')?.touched">
-                Valid email is required
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label>Phone Number *</label>
-              <input type="tel" formControlName="phone" class="form-control">
-              <div class="error" *ngIf="personalForm.get('phone')?.invalid && personalForm.get('phone')?.touched">
-                Phone number is required
-              </div>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>Date of Birth</label>
-                <input type="date" formControlName="dateOfBirth" class="form-control">
-              </div>
-              <div class="form-group">
-                <label>Gender</label>
-                <select formControlName="gender" class="form-control">
-                  <option value="">Select Gender</option>
-                  <option value="male">Male</option>
-                  <option value="female">Female</option>
-                  <option value="other">Other</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary" [disabled]="saving">
-                <i class="fas fa-save"></i>
-                <span *ngIf="!saving">Save Changes</span>
-                <span *ngIf="saving">
-                  <i class="fas fa-spinner fa-spin"></i> Saving...
-                </span>
-              </button>
-            </div>
-          </form>
-        </div>
+        </form>
+
       </div>
 
-      <!-- Addresses Tab -->
-      <div class="tab-content" *ngIf="activeTab === 'addresses'">
-        <div class="addresses-header">
-          <h3>My Addresses</h3>
-          <button class="btn btn-primary" (click)="addAddress()">
-            <i class="fas fa-plus"></i> Add New Address
-          </button>
-        </div>
+    </ui-card>
 
-        <!-- Address Form -->
-        <div class="address-form-card" *ngIf="showAddressForm">
-          <h4>{{editingAddress ? 'Edit Address' : 'Add New Address'}}</h4>
-          <form [formGroup]="addressForm" (ngSubmit)="saveAddress()">
-            <div class="form-group">
-              <label>Address Type</label>
-              <select formControlName="type" class="form-control">
-                <option value="shipping">Shipping Address</option>
-                <option value="billing">Billing Address</option>
-              </select>
-            </div>
-            
-            <div class="form-group">
-              <label>Full Name *</label>
-              <input type="text" formControlName="name" class="form-control">
-            </div>
-            
-            <div class="form-group">
-              <label>Street Address *</label>
-              <input type="text" formControlName="street" class="form-control">
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>City *</label>
-                <input type="text" formControlName="city" class="form-control">
-              </div>
-              <div class="form-group">
-                <label>State *</label>
-                <input type="text" formControlName="state" class="form-control">
-              </div>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>ZIP Code *</label>
-                <input type="text" formControlName="zipCode" class="form-control">
-              </div>
-              <div class="form-group">
-                <label>Country *</label>
-                <select formControlName="country" class="form-control">
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="UK">United Kingdom</option>
-                </select>
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label>Phone Number *</label>
-              <input type="tel" formControlName="phone" class="form-control">
-            </div>
-            
-            <div class="form-group">
-              <label class="checkbox-label">
-                <input type="checkbox" formControlName="isDefault">
-                Set as default address
-              </label>
-            </div>
-            
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary" [disabled]="saving">
-                <i class="fas fa-save"></i> {{editingAddress ? 'Update' : 'Add'}} Address
-              </button>
-              <button type="button" class="btn btn-outline" (click)="cancelAddressForm()">
-                Cancel
-              </button>
-            </div>
-          </form>
-        </div>
+    <!-- ADDRESSES -->
+    <ui-card *ngIf="activeTab === 'addresses'">
 
-        <!-- Addresses List -->
-        <div class="addresses-list">
-          <div *ngFor="let address of addresses" class="address-card">
-            <div class="address-info">
-              <div class="address-header">
-                <h4>{{address.type === 'shipping' ? 'Shipping' : 'Billing'}} Address</h4>
-                <span *ngIf="address.isDefault" class="default-badge">Default</span>
-              </div>
-              <div class="address-details">
-                <div class="address-name">{{address.name}}</div>
-                <div class="address-street">{{address.street}}</div>
-                <div class="address-city">
-                  {{address.city}}, {{address.state}} {{address.zipCode}}
-                </div>
-                <div class="address-country">{{address.country}}</div>
-                <div class="address-phone">{{address.phone}}</div>
-              </div>
-            </div>
-            
-            <div class="address-actions">
-              <button class="btn btn-outline" (click)="editAddress(address)">
-                <i class="fas fa-edit"></i> Edit
-              </button>
-              <button class="btn btn-outline" (click)="setDefaultAddress(address.id)" 
-                      [disabled]="address.isDefault">
-                <i class="fas fa-star"></i> Set Default
-              </button>
-              <button class="btn btn-danger" (click)="deleteAddress(address.id)">
-                <i class="fas fa-trash"></i> Delete
-              </button>
-            </div>
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold">My Addresses</h2>
+
+        <ui-button (click)="addAddress()">
+          Add Address
+        </ui-button>
+      </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+
+        <div *ngFor="let address of addresses" class="border rounded-xl p-4 hover:shadow-md transition">
+
+          <div class="flex justify-between items-center mb-3">
+
+            <h3 class="font-semibold">
+              {{ address.type | titlecase }} Address
+            </h3>
+
+            <ui-badge *ngIf="address.isDefault" variant="success">
+              Default
+            </ui-badge>
+
           </div>
-        </div>
-      </div>
 
-      <!-- Payment Methods Tab -->
-      <div class="tab-content" *ngIf="activeTab === 'payment'">
-        <div class="payment-header">
-          <h3>Saved Payment Methods</h3>
-          <button class="btn btn-primary">
-            <i class="fas fa-plus"></i> Add New Card
-          </button>
-        </div>
+          <p class="text-gray-600 text-sm">
+            {{ address.street }} <br>
+            {{ address.city }}, {{ address.state }} {{ address.zipCode }}
+          </p>
 
-        <div class="saved-cards-list">
-          <div *ngFor="let card of savedCards" class="card-item">
-            <div class="card-info">
-              <div class="card-brand">{{card.brand}}</div>
-              <div class="card-number">•••• •••• •••• {{card.last4}}</div>
-              <div class="card-name">{{card.name}}</div>
-              <div class="card-expiry">Expires {{card.expiry}}</div>
-            </div>
-            
-            <div class="card-actions">
-              <button class="btn btn-outline">
-                <i class="fas fa-edit"></i> Edit
-              </button>
-              <button class="btn btn-danger" (click)="deleteSavedCard(card.id)">
-                <i class="fas fa-trash"></i> Delete
-              </button>
-            </div>
+          <div class="flex gap-3 mt-4">
+
+            <ui-button variant="secondary" size="sm">
+              Edit
+            </ui-button>
+
+            <ui-button variant="danger" size="sm">
+              Delete
+            </ui-button>
+
           </div>
+
         </div>
+
       </div>
 
-      <!-- Security Tab -->
-      <div class="tab-content" *ngIf="activeTab === 'security'">
-        <div class="security-section">
-          <h3>Change Password</h3>
-          <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
-            <div class="form-group">
-              <label>Current Password *</label>
-              <input type="password" formControlName="currentPassword" class="form-control">
-              <div class="error" *ngIf="passwordForm.get('currentPassword')?.invalid && passwordForm.get('currentPassword')?.touched">
-                Current password is required
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label>New Password *</label>
-              <input type="password" formControlName="newPassword" class="form-control">
-              <div class="error" *ngIf="passwordForm.get('newPassword')?.invalid && passwordForm.get('newPassword')?.touched">
-                Password must be at least 8 characters
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label>Confirm New Password *</label>
-              <input type="password" formControlName="confirmPassword" class="form-control">
-              <div class="error" *ngIf="passwordForm.errors?.['passwordMismatch']">
-                Passwords do not match
-              </div>
-            </div>
-            
-            <div class="form-actions">
-              <button type="submit" class="btn btn-primary" [disabled]="saving">
-                <i class="fas fa-key"></i>
-                <span *ngIf="!saving">Change Password</span>
-                <span *ngIf="saving">
-                  <i class="fas fa-spinner fa-spin"></i> Changing...
-                </span>
-              </button>
-            </div>
-          </form>
-        </div>
+    </ui-card>
+
+    <!-- PAYMENT -->
+    <ui-card *ngIf="activeTab === 'payment'">
+
+      <div class="flex justify-between items-center mb-6">
+        <h2 class="text-xl font-semibold">Saved Cards</h2>
+        <ui-button>Add Card</ui-button>
       </div>
-    </div>
-    </div>
+
+      <div class="grid md:grid-cols-2 gap-6">
+
+        <div *ngFor="let card of savedCards" class="border rounded-xl p-4 bg-gray-50">
+
+          <p class="font-semibold uppercase">
+            {{ card.brand }}
+          </p>
+
+          <p class="text-gray-600">
+            •••• •••• •••• {{ card.last4 }}
+          </p>
+
+          <p class="text-sm text-gray-500">
+            Expires {{ card.expiry }}
+          </p>
+
+        </div>
+
+      </div>
+
+    </ui-card>
+
+    <!-- SECURITY -->
+    <ui-card *ngIf="activeTab === 'security'">
+
+      <h2 class="text-xl font-semibold mb-6">
+        Change Password
+      </h2>
+
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()" class="grid md:grid-cols-2 gap-6">
+
+        <ui-input type="password" label="Current Password" formControlName="currentPassword">
+        </ui-input>
+
+        <ui-input type="password" label="New Password" formControlName="newPassword">
+        </ui-input>
+
+        <ui-input type="password" label="Confirm Password" formControlName="confirmPassword">
+        </ui-input>
+
+        <div class="md:col-span-2 flex justify-end">
+          <ui-button>
+            Change Password
+          </ui-button>
+        </div>
+
+      </form>
+
+    </ui-card>
+
   </div>
-  
-  <app-footer></app-footer>
+
 </div>
+
+<app-footer></app-footer>

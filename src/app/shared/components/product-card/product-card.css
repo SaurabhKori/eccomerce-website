@@ -284,3 +284,10 @@
     font-size: 1.1rem;
   }
 }
+button {
+  transition: transform 0.3s ease, color 0.3s ease;
+}
+
+button:active {
+  transform: scale(1.2);
+}

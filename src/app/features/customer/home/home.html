@@ -1,109 +1,83 @@
-<div class="home-page">
-  <!-- Navigation Bar -->
-  <app-navbar></app-navbar>
+<app-navbar></app-navbar>
 
-  <!-- Hero Banner -->
-  <section class="hero-banner">
-    <div class="hero-content">
-      <h1 class="hero-title">Amazing Deals on Premium Products</h1>
-      <p class="hero-subtitle">Discover the latest trends and exclusive offers</p>
-      <div class="hero-actions">
-        <button class="btn btn-primary btn-large" (click)="viewCategory('all')">
-          Shop Now
-        </button>
-        <button class="btn btn-outline btn-large">
-          View Offers
-        </button>
-      </div>
-    </div>
-    <div class="hero-image">
-      <img src="https://via.placeholder.com/600x400" alt="Hero Banner">
-    </div>
-  </section>
+<!-- 🔥 HERO CAROUSEL -->
+<section class="py-6 bg-gray-100">
+ <section class="py-6 bg-gray-100">
+  <div class="container mx-auto">
 
-  <!-- Categories Section -->
-  <section class="categories-section">
-    <div class="container">
-      <h2 class="section-title">Shop by Category</h2>
-      <div class="categories-grid">
-        <div class="category-card" *ngFor="let category of categories" (click)="viewCategory(category.id)">
-          <div class="category-icon">
-            <i [class]="category.icon"></i>
-             <!-- <i class="fa-solid fa-shirt"></i> -->
+    <swiper-container
+      loop="true"
+      autoplay-delay="3000"
+      pagination="true"
+      pagination-clickable="true"
+      class="rounded-xl overflow-hidden shadow-lg">
+
+      <swiper-slide *ngFor="let banner of banners">
+        <img [src]="banner.image"
+             class="w-full h-[400px] object-cover"
+             alt="Banner">
+      </swiper-slide>
+
+    </swiper-container>
+
+  </div>
+</section>
+</section>
+
+<!-- 🛍 CATEGORY SECTION -->
+<section class="container py-12">
+  <h2 class="text-3xl font-bold mb-8 text-center">Shop by Category</h2>
+  <div class="grid grid-cols-2 md:grid-cols-4 gap-6">
+    <div *ngFor="let category of categories"
+         class="bg-white rounded-xl shadow-md p-6 text-center cursor-pointer 
+                hover:shadow-xl hover:-translate-y-2 transition duration-300">
+      <i [class]="category.icon + ' text-4xl text-orange-500 mb-3'"></i>
+      <h3 class="font-semibold text-lg">{{category.name}}</h3>
+      <p class="text-gray-500 text-sm">
+        {{category.productCount}} Products
+      </p>
+    </div>
+  </div>
+</section>
+
+<!-- ⭐ FEATURED PRODUCTS -->
+<section class="container py-12">
+  <h2 class="text-3xl font-bold mb-8">Featured Products</h2>
+
+  <div *ngIf="loading" class="grid grid-cols-1 md:grid-cols-4 gap-6">
+    <app-skeleton-loader *ngFor="let i of [1,2,3,4]"></app-skeleton-loader>
+  </div>
+
+  <div *ngIf="!loading"
+       class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-6">
+    <app-product-card
+      *ngFor="let product of featuredProducts"
+      [product]="product">
+    </app-product-card>
+  </div>
+</section>
+
+<!-- 🎁 OFFERS SECTION -->
+<section class="bg-gray-100 py-12">
+  <div class="container">
+    <h2 class="text-3xl font-bold mb-8">Special Offers</h2>
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+      <div *ngFor="let offer of offers"
+           class="bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-2xl transition">
+        <div class="relative">
+          <img [src]="offer.image"
+               class="w-full h-48 object-cover">
+          <div class="absolute top-3 left-3 bg-red-500 text-white px-3 py-1 rounded-full text-sm">
+            {{offer.discount}}% OFF
           </div>
-          <h3>{{category.name}}</h3>
-          <span class="product-count">{{category.productCount}} products</span>
+        </div>
+        <div class="p-4">
+          <h3 class="font-semibold text-lg">{{offer.title}}</h3>
+          <p class="text-gray-500 text-sm">{{offer.description}}</p>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Featured Products -->
-  <section class="featured-section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Featured Products</h2>
-        <a class="view-all-link" routerLink="/products?featured=true">View All</a>
-      </div>
-      <div class="products-grid" *ngIf="!loading">
-        <app-product-card 
-          *ngFor="let product of featuredProducts" 
-          [product]="product"
-          (productClick)="viewProduct($event)"
-          (addToCart)="addToCart($event)"
-          (addToWishlist)="addToWishlist($event)">
-        </app-product-card>
-      </div>
-      <div class="loading-spinner" *ngIf="loading">
-        <i class="fas fa-spinner fa-spin"></i>
-      </div>
-    </div>
-  </section>
-
-  <!-- Top Rated Products -->
-  <section class="top-rated-section">
-    <div class="container">
-      <div class="section-header">
-        <h2 class="section-title">Top Rated Products</h2>
-        <a class="view-all-link" routerLink="/products?sort=rating">View All</a>
-      </div>
-      <div class="products-grid">
-        <app-product-card 
-          *ngFor="let product of topRatedProducts" 
-          [product]="product"
-          (productClick)="viewProduct($event)"
-          (addToCart)="addToCart($event)"
-          (addToWishlist)="addToWishlist($event)">
-        </app-product-card>
-      </div>
-    </div>
-  </section>
-
-  <!-- Offers Section -->
-  <section class="offers-section">
-    <div class="container">
-      <h2 class="section-title">Special Offers</h2>
-      <div class="offers-grid">
-        <div class="offer-card" *ngFor="let offer of offers">
-          <div class="offer-image">
-            <img [src]="offer.image" [alt]="offer.title">
-            <div class="offer-discount">
-              {{offer.discount}}% OFF
-            </div>
-          </div>
-          <div class="offer-content">
-            <h3>{{offer.title}}</h3>
-            <p>{{offer.description}}</p>
-            <div class="offer-validity">
-              <i class="far fa-clock"></i>
-              Valid until {{offer.validUntil | date:'mediumDate'}}
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Footer -->
-  <app-footer></app-footer>
-</div>
+<app-footer></app-footer>

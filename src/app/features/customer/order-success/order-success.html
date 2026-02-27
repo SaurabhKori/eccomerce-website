@@ -1,132 +1,258 @@
-<div class="order-success-page">
-  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
-  
-  <div class="order-success-main" [class.sidebar-collapsed]="sidebarCollapsed">
-    <div *ngIf="loading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading order details...</p>
+<div class="min-h-screen bg-gray-50 ">
+
+  <!-- Sidebar -->
+
+  <app-navbar></app-navbar>
+  <!-- Main Content -->
+  <div class="flex-1 p-6 lg:p-10">
+
+    <!-- LOADING -->
+    <div *ngIf="loading"
+         class="flex flex-col items-center justify-center py-24 text-orange-500">
+
+      <i class="fas fa-spinner fa-spin text-3xl"></i>
+      <p class="mt-4 text-gray-500">Loading order details...</p>
+
     </div>
 
-    <div *ngIf="!loading && orderDetails" class="success-content">
-      <!-- Success Header -->
-      <div class="success-header">
-        <div class="success-icon">
+    <!-- SUCCESS CONTENT -->
+    <div *ngIf="!loading && orderDetails"
+         class="max-w-5xl mx-auto space-y-8">
+
+      <!-- SUCCESS HEADER -->
+      <div class="bg-gradient-to-r from-orange-500 to-orange-600
+                  text-white text-center rounded-2xl shadow-lg p-10">
+
+        <div class="text-5xl mb-4 animate-bounce">
           <i class="fas fa-check-circle"></i>
         </div>
-        <h1>Order Placed Successfully!</h1>
-        <p>Thank you for your purchase. Your order has been confirmed.</p>
+
+        <h1 class="text-3xl font-bold mb-3">
+          Order Placed Successfully!
+        </h1>
+
+        <p class="text-orange-100">
+          Thank you for your purchase. Your order has been confirmed.
+        </p>
+
       </div>
 
-      <!-- Order Details Card -->
-      <div class="order-details-card">
-        <div class="order-info">
-          <div class="order-number">
-            <h3>Order Number</h3>
-            <div class="order-id">{{orderDetails.id}}</div>
+      <!-- ORDER DETAILS -->
+      <div class="bg-white rounded-2xl shadow-md p-8
+                  grid grid-cols-1 md:grid-cols-2 gap-8">
+
+        <div class="space-y-6">
+
+          <div>
+            <h3 class="text-sm text-gray-500 mb-1">
+              Order Number
+            </h3>
+            <div class="text-2xl font-bold text-orange-600 font-mono">
+              {{orderDetails.id}}
+            </div>
           </div>
-          
-          <div class="order-dates">
-            <div class="date-item">
-              <i class="fas fa-calendar"></i>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-6">
+
+            <div class="flex items-center gap-3">
+              <i class="fas fa-calendar text-orange-500 text-xl"></i>
               <div>
-                <div class="date-label">Order Date</div>
-                <div class="date-value">{{formatDate(orderDetails.orderDate)}}</div>
+                <div class="text-sm text-gray-500">Order Date</div>
+                <div class="font-semibold">
+                  {{formatDate(orderDetails.orderDate)}}
+                </div>
               </div>
             </div>
-            <div class="date-item">
-              <i class="fas fa-truck"></i>
+
+            <div class="flex items-center gap-3">
+              <i class="fas fa-truck text-orange-500 text-xl"></i>
               <div>
-                <div class="date-label">Expected Delivery</div>
-                <div class="date-value">{{formatDate(orderDetails.deliveryDate)}}</div>
+                <div class="text-sm text-gray-500">Expected Delivery</div>
+                <div class="font-semibold">
+                  {{formatDate(orderDetails.deliveryDate)}}
+                </div>
               </div>
             </div>
+
           </div>
+
         </div>
 
-        <div class="order-status">
-          <span class="status-badge confirmed">{{orderDetails.status}}</span>
+        <div class="flex items-center md:justify-end">
+          <span class="px-4 py-2 rounded-full
+                       bg-green-100 text-green-600
+                       font-semibold text-sm">
+            {{orderDetails.status}}
+          </span>
         </div>
+
       </div>
 
-      <!-- Order Items -->
-      <div class="order-items-section">
-        <h3>Order Items</h3>
-        <div class="order-items">
-          <div *ngFor="let item of orderDetails.items" class="order-item">
-            <img [src]="item.image" [alt]="item.name" class="item-image">
-            <div class="item-details">
-              <div class="item-name">{{item.name}}</div>
-              <div class="item-quantity">Quantity: {{item.quantity}}</div>
+      <!-- ORDER ITEMS -->
+      <div class="bg-white rounded-2xl shadow-md p-8 space-y-6">
+
+        <h3 class="text-xl font-bold">
+          Order Items
+        </h3>
+
+        <div *ngFor="let item of orderDetails.items"
+             class="flex flex-col md:flex-row md:items-center gap-6
+                    bg-gray-50 rounded-2xl p-5">
+
+          <img [src]="item.image"
+               class="w-24 h-24 rounded-2xl object-cover">
+
+          <div class="flex-1">
+            <div class="font-semibold text-gray-800">
+              {{item.name}}
             </div>
-            <div class="item-price">{{formatCurrency(item.price * item.quantity)}}</div>
-          </div>
-        </div>
-        
-        <div class="order-total">
-          <div class="total-row">
-            <span>Total Amount</span>
-            <span class="total-amount">{{formatCurrency(orderDetails.total)}}</span>
-          </div>
-        </div>
-      </div>
-
-      <!-- Shipping Address -->
-      <div class="shipping-address-section">
-        <h3>Shipping Address</h3>
-        <div class="address-card">
-          <div class="address-info">
-            <div class="address-name">{{orderDetails.shippingAddress.name}}</div>
-            <div class="address-street">{{orderDetails.shippingAddress.street}}</div>
-            <div class="address-city">
-              {{orderDetails.shippingAddress.city}}, {{orderDetails.shippingAddress.state}} {{orderDetails.shippingAddress.zipCode}}
+            <div class="text-sm text-gray-500">
+              Quantity: {{item.quantity}}
             </div>
           </div>
-        </div>
-      </div>
 
-      <!-- Action Buttons -->
-      <div class="action-buttons">
-        <button class="btn btn-primary track-order" (click)="trackOrder()">
-          <i class="fas fa-map-marker-alt"></i> Track Order
-        </button>
-        <button class="btn btn-outline view-orders" (click)="viewOrderHistory()">
-          <i class="fas fa-list"></i> View Order History
-        </button>
-        <button class="btn btn-outline download-invoice" (click)="downloadInvoice()">
-          <i class="fas fa-download"></i> Download Invoice
-        </button>
-        <button class="btn btn-outline share-order" (click)="shareOrder()">
-          <i class="fas fa-share"></i> Share Order
-        </button>
-      </div>
-
-      <!-- Continue Shopping -->
-      <div class="continue-shopping">
-        <p>Need more items?</p>
-        <button class="btn btn-primary btn-large" (click)="continueShopping()">
-          <i class="fas fa-shopping-bag"></i> Continue Shopping
-        </button>
-      </div>
-
-      <!-- Additional Info -->
-      <div class="additional-info">
-        <div class="info-card">
-          <i class="fas fa-envelope"></i>
-          <div class="info-content">
-            <h4>Order Confirmation Email</h4>
-            <p>We've sent a confirmation email with all your order details. Please check your inbox.</p>
+          <div class="font-bold text-orange-600 text-lg">
+            {{formatCurrency(item.price * item.quantity)}}
           </div>
+
         </div>
-        
-        <div class="info-card">
-          <i class="fas fa-headset"></i>
-          <div class="info-content">
-            <h4>Need Help?</h4>
-            <p>Our customer support team is available 24/7 to assist you with any questions.</p>
-            <a href="/contact" class="support-link">Contact Support</a>
-          </div>
+
+        <div class="border-t pt-6 flex justify-between
+                    text-lg font-bold">
+
+          <span>Total Amount</span>
+          <span class="text-orange-600 text-xl">
+            {{formatCurrency(orderDetails.total)}}
+          </span>
+
         </div>
+
       </div>
+
+      <!-- SHIPPING ADDRESS -->
+      <div class="bg-white rounded-2xl shadow-md p-8 space-y-4">
+
+        <h3 class="text-xl font-bold">
+          Shipping Address
+        </h3>
+
+        <div class="bg-gray-50 rounded-2xl p-6 border-l-4 border-orange-500">
+
+          <div class="font-semibold text-gray-800">
+            {{orderDetails.shippingAddress.name}}
+          </div>
+
+          <div class="text-gray-600">
+            {{orderDetails.shippingAddress.street}}
+          </div>
+
+          <div class="text-gray-600">
+            {{orderDetails.shippingAddress.city}},
+            {{orderDetails.shippingAddress.state}}
+            {{orderDetails.shippingAddress.zipCode}}
+          </div>
+
+        </div>
+
+      </div>
+
+      <!-- ACTION BUTTONS -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <button
+          (click)="trackOrder()"
+          class="bg-orange-500 hover:bg-orange-600
+                 text-white py-3 rounded-2xl
+                 font-semibold transition">
+          <i class="fas fa-map-marker-alt mr-2"></i>
+          Track Order
+        </button>
+
+        <button
+          (click)="viewOrderHistory()"
+          class="border border-orange-500 text-orange-500
+                 hover:bg-orange-500 hover:text-white
+                 py-3 rounded-2xl font-semibold transition">
+          View Orders
+        </button>
+
+        <button
+          (click)="downloadInvoice()"
+          class="border border-orange-500 text-orange-500
+                 hover:bg-orange-500 hover:text-white
+                 py-3 rounded-2xl font-semibold transition">
+          Download Invoice
+        </button>
+
+        <button
+          (click)="shareOrder()"
+          class="border border-orange-500 text-orange-500
+                 hover:bg-orange-500 hover:text-white
+                 py-3 rounded-2xl font-semibold transition">
+          Share
+        </button>
+
+      </div>
+
+      <!-- CONTINUE SHOPPING -->
+      <div class="text-center bg-gray-100 rounded-2xl p-8">
+
+        <p class="text-gray-600 mb-4">
+          Need more items?
+        </p>
+
+        <button
+          (click)="continueShopping()"
+          class="bg-orange-500 hover:bg-orange-600
+                 text-white px-8 py-4 rounded-2xl
+                 font-semibold text-lg transition">
+          <i class="fas fa-shopping-bag mr-2"></i>
+          Continue Shopping
+        </button>
+
+      </div>
+
+      <!-- ADDITIONAL INFO -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <div class="bg-white rounded-2xl shadow-md p-6 flex gap-4">
+
+          <i class="fas fa-envelope text-orange-500 text-2xl"></i>
+
+          <div>
+            <h4 class="font-semibold mb-2">
+              Order Confirmation Email
+            </h4>
+            <p class="text-gray-600 text-sm">
+              We've sent a confirmation email with all your order details.
+            </p>
+          </div>
+
+        </div>
+
+        <div class="bg-white rounded-2xl shadow-md p-6 flex gap-4">
+
+          <i class="fas fa-headset text-orange-500 text-2xl"></i>
+
+          <div>
+            <h4 class="font-semibold mb-2">
+              Need Help?
+            </h4>
+            <p class="text-gray-600 text-sm mb-2">
+              Our customer support team is available 24/7.
+            </p>
+            <a href="/contact"
+               class="text-orange-500 font-semibold hover:underline">
+              Contact Support
+            </a>
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
+
   </div>
+
 </div>

@@ -1,40 +1,113 @@
-<header class="main-nav">
-  <div class="nav-container">
-    <div class="nav-left">
-      <div class="logo">
-        <h2>ECommerce</h2>
-      </div>
-      <nav class="nav-menu">
-        <a href="/products" class="nav-link">Products</a>
-        <a href="/categories" class="nav-link">Categories</a>
-        <a href="/deals" class="nav-link">Deals</a>
-        <a href="/about" class="nav-link">About</a>
-      </nav>
-    </div>
-    
-    <div class="nav-right">
-      <div class="search-bar">
-        <input type="text" #searchInput placeholder="Search products..." class="search-input" (input)="onSearch($event)" (keyup.enter)="onSearchSubmit(searchInput)">
-        <button class="search-btn" (click)="onSearchSubmit(searchInput)">
-          <i class="fas fa-search"></i>
-        </button>
-      </div>
-      
-      <div class="nav-actions">
-        <a href="/wishlist" class="nav-link">
-          <i class="far fa-heart"></i>
-          <span class="nav-text">Wishlist</span>
-        </a>
-        <a href="/cart" class="nav-link cart-link">
-          <i class="fas fa-shopping-cart"></i>
-          <span class="cart-count" *ngIf="cartItems > 0">{{cartItems}}</span>
-        </a>
-        <div class="user-menu" (click)="onUserMenu()">
-          <img [src]="userAvatar" alt="User" class="user-avatar">
-          <span class="user-name">{{userName}}</span>
-          <i class="fas fa-chevron-down"></i>
+<header class="sticky top-0 z-50 bg-white shadow-md border-b">
+
+  <div class="max-w-7xl mx-auto px-4">
+
+    <div class="flex items-center justify-between h-16">
+
+      <!-- LEFT SECTION -->
+      <div class="flex items-center gap-6">
+
+        <!-- LOGO -->
+        <div class="text-2xl font-bold text-orange-600 cursor-pointer"
+             (click)="navigateTo('/')">
+          ShopX
         </div>
+
+        <!-- MENU -->
+        <nav class="hidden md:flex items-center gap-6 text-gray-700 font-medium">
+          <a routerLink="/products" class="hover:text-orange-600 transition">Products</a>
+          <a routerLink="/categories" class="hover:text-orange-600 transition">Categories</a>
+          <a routerLink="/deals" class="hover:text-orange-600 transition">Deals</a>
+        </nav>
+
       </div>
+
+      <!-- SEARCH -->
+      <div class="hidden md:flex flex-1 max-w-xl mx-6">
+
+        <div class="flex w-full border rounded-full overflow-hidden shadow-sm">
+
+          <input type="text"
+                 #searchInput
+                 placeholder="Search products..."
+                 class="flex-1 px-4 py-2 outline-none"
+                 (keyup.enter)="onSearchSubmit(searchInput)">
+
+          <button class="bg-orange-500 text-white px-5 hover:bg-orange-600 transition"
+                  (click)="onSearchSubmit(searchInput)">
+            <i class="fas fa-search"></i>
+          </button>
+
+        </div>
+
+      </div>
+
+      <!-- RIGHT SECTION -->
+      <div class="flex items-center gap-6">
+
+        <!-- WISHLIST -->
+        <div class="relative cursor-pointer"
+             (click)="navigateTo('/wishlist')">
+
+          <i class="far fa-heart text-xl hover:text-orange-600 transition"></i>
+
+        </div>
+
+        <!-- CART -->
+        <div class="relative cursor-pointer"
+             (click)="navigateTo('/cart')">
+
+          <i class="fas fa-shopping-cart text-xl hover:text-orange-600 transition"></i>
+
+          <span *ngIf="cartItems > 0"
+                class="absolute -top-2 -right-2 bg-red-500 text-white text-xs
+                       rounded-full px-2 py-0.5 animate-bounce">
+            {{cartItems}}
+          </span>
+
+        </div>
+
+        <!-- USER MENU -->
+        <div class="relative" (click)="toggleDropdown()">
+
+          <div class="flex items-center gap-2 cursor-pointer">
+            <img [src]="userAvatar"
+                 class="w-8 h-8 rounded-full object-cover border">
+            <span class="hidden md:block text-sm font-medium">
+              {{userName}}
+            </span>
+            <i class="fas fa-chevron-down text-xs"></i>
+          </div>
+
+          <!-- DROPDOWN -->
+          <div *ngIf="showDropdown"
+               class="absolute right-0 mt-2 w-48 bg-white shadow-lg rounded-lg py-2">
+
+            <a class="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+               (click)="navigateTo('/profile')">
+              My Profile
+            </a>
+
+            <a class="block px-4 py-2 hover:bg-gray-100 cursor-pointer"
+               (click)="navigateTo('/orders')">
+              My Orders
+            </a>
+
+            <div class="border-t my-2"></div>
+
+            <a class="block px-4 py-2 text-red-500 hover:bg-gray-100 cursor-pointer"
+               (click)="logout()">
+              Logout
+            </a>
+
+          </div>
+
+        </div>
+
+      </div>
+
     </div>
+
   </div>
+
 </header>

@@ -1,171 +1,227 @@
-<div class="orders-page">
-  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
-  
-  <div class="orders-main" [class.sidebar-collapsed]="sidebarCollapsed">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1>My Orders</h1>
-      <div class="header-actions">
-        <button class="btn btn-primary" (click)="routes('/products')">
-          <i class="fas fa-shopping-bag"></i> Continue Shopping
-        </button>
-      </div>
+<div class="orders-page bg-gray-50 min-h-screen">
+
+  <app-navbar></app-navbar>
+
+  <div class="max-w-6xl mx-auto px-4 py-8">
+
+    <!-- ================= HEADER ================= -->
+    <div class="flex flex-col md:flex-row md:items-center md:justify-between mb-8 gap-4">
+      <h1 class="text-3xl font-bold text-gray-800">My Orders</h1>
+
+      <button
+        class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg font-semibold transition"
+        (click)="routes('/products')">
+        Continue Shopping
+      </button>
     </div>
 
-    <!-- Filters -->
-    <div class="filters-section">
-      <form [formGroup]="filterForm" class="filters-form">
-        <div class="filter-group">
-          <label>Status</label>
-          <select formControlName="status" class="form-control">
-            <option value="">All Orders</option>
-            <option value="Pending">Pending</option>
-            <option value="Confirmed">Confirmed</option>
-            <option value="Shipped">Shipped</option>
-            <option value="Delivered">Delivered</option>
-            <option value="Cancelled">Cancelled</option>
-          </select>
-        </div>
-        
-        <div class="filter-group">
-          <label>Search</label>
-          <input type="text" formControlName="search" class="form-control" placeholder="Order ID or product name">
-        </div>
-        
-        <div class="filter-group">
-          <label>Date Range</label>
-          <select formControlName="dateRange" class="form-control">
-            <option value="">All Time</option>
-            <option value="7">Last 7 Days</option>
-            <option value="30">Last 30 Days</option>
-            <option value="90">Last 3 Months</option>
-            <option value="365">Last Year</option>
-          </select>
-        </div>
+    <!-- ================= FILTERS ================= -->
+    <div class="bg-white p-6 rounded-xl shadow-sm mb-8">
+
+      <form [formGroup]="filterForm"
+            class="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+        <select formControlName="status"
+                class="border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-400">
+          <option value="">All Orders</option>
+          <option value="Pending">Pending</option>
+          <option value="Confirmed">Confirmed</option>
+          <option value="Shipped">Shipped</option>
+          <option value="Delivered">Delivered</option>
+          <option value="Cancelled">Cancelled</option>
+        </select>
+
+        <input type="text"
+               formControlName="search"
+               placeholder="Search Order ID or Product..."
+               class="border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-400">
+
+        <select formControlName="dateRange"
+                class="border rounded-lg px-4 py-2 focus:ring-2 focus:ring-orange-400">
+          <option value="">All Time</option>
+          <option value="7">Last 7 Days</option>
+          <option value="30">Last 30 Days</option>
+          <option value="90">Last 3 Months</option>
+          <option value="365">Last Year</option>
+        </select>
+
       </form>
     </div>
 
-    <!-- Loading State -->
-    <div *ngIf="loading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading orders...</p>
+    <!-- ================= LOADING ================= -->
+    <div *ngIf="loading"
+         class="flex flex-col items-center justify-center py-16">
+      <div class="w-10 h-10 border-4 border-orange-200 border-t-orange-500 rounded-full animate-spin mb-4"></div>
+      <p class="text-gray-500">Loading orders...</p>
     </div>
 
-    <!-- Empty State -->
-    <div *ngIf="!loading && filteredOrders.length === 0" class="empty-orders">
-      <i class="fas fa-box-open"></i>
-      <h3>{{orders.length === 0 ? 'No orders yet' : 'No orders found'}}</h3>
-      <p>{{orders.length === 0 ? 'Start shopping to see your orders here!' : 'Try adjusting your filters'}}</p>
-      <button class="btn btn-primary" (click)="routes('/products')">
+    <!-- ================= EMPTY STATE ================= -->
+    <div *ngIf="!loading && filteredOrders.length === 0"
+         class="bg-white rounded-2xl shadow-md p-12 text-center">
+
+      <div class="text-6xl text-gray-300 mb-4">
+        <i class="fas fa-box-open"></i>
+      </div>
+
+      <h3 class="text-xl font-semibold text-gray-700 mb-2">
+        {{orders.length === 0 ? 'No orders yet' : 'No orders found'}}
+      </h3>
+
+      <p class="text-gray-500 mb-6">
+        {{orders.length === 0 ? 
+          'Start shopping to see your orders here!' : 
+          'Try adjusting your filters'}}
+      </p>
+
+      <button
+        class="bg-orange-500 hover:bg-orange-600 text-white px-6 py-2 rounded-lg"
+        (click)="routes('/products')">
         Start Shopping
       </button>
     </div>
 
-    <!-- Orders List -->
-    <div *ngIf="!loading && filteredOrders.length > 0" class="orders-list">
-      <div *ngFor="let order of filteredOrders" class="order-card">
-        <!-- Order Header -->
-        <div class="order-header">
-          <div class="order-info">
-            <div class="order-number">
-              <span class="label">Order #</span>
-              <span class="value">{{order.id}}</span>
+    <!-- ================= ORDERS LIST ================= -->
+    <div *ngIf="!loading && filteredOrders.length > 0">
+
+      <div *ngFor="let order of filteredOrders"
+           class="bg-white rounded-2xl shadow-md mb-8 overflow-hidden hover:shadow-xl transition">
+
+        <!-- ===== ORDER HEADER ===== -->
+        <div class="flex flex-col md:flex-row md:justify-between md:items-center
+                    bg-gray-50 px-6 py-4 border-b">
+
+          <div class="flex flex-col gap-1">
+            <div class="text-sm text-gray-500">
+              Order ID:
+              <span class="font-semibold text-gray-800">
+                {{order.id}}
+              </span>
             </div>
-            <div class="order-date">
-              <span class="label">Placed on</span>
-              <span class="value">{{formatDate(order.orderDate)}}</span>
+
+            <div class="text-sm text-gray-500">
+              Placed on {{formatDate(order.orderDate)}}
             </div>
-            <div class="order-total">
-              <span class="label">Total</span>
-              <span class="value">{{formatCurrency(order.total)}}</span>
+
+            <div class="text-lg font-bold text-orange-600">
+              {{formatCurrency(order.total)}}
             </div>
           </div>
-          
-          <div class="order-status">
-            <span class="status-badge" [class]="getStatusClass(order.status)">
-              <i [class]="getStatusIcon(order.status)"></i>
-              {{order.status}}
-            </span>
-          </div>
+
+          <span
+            class="mt-4 md:mt-0 px-4 py-1 rounded-full text-sm font-semibold"
+            [ngClass]="getStatusColor(order.status)">
+            {{order.status}}
+          </span>
         </div>
 
-        <!-- Order Items -->
-        <div class="order-items">
-          <div *ngFor="let item of order.items; let isLast = last" class="order-item" [class]="!isLast ? 'border-bottom' : ''">
-            <img [src]="item.image" [alt]="item.name" class="item-image">
-            <div class="item-details">
-              <div class="item-name">{{item.name}}</div>
-              <div class="item-quantity">Quantity: {{item.quantity}}</div>
+        <!-- ===== ORDER ITEMS ===== -->
+        <div class="divide-y">
+
+          <div *ngFor="let item of order.items"
+               class="flex flex-col md:flex-row md:items-center
+                      justify-between gap-4 px-6 py-4">
+
+            <div class="flex items-center gap-4">
+
+              <img [src]="item.image"
+                   class="w-20 h-20 rounded-lg object-cover border">
+
+              <div>
+                <div class="font-semibold text-gray-800">
+                  {{item.name}}
+                </div>
+
+                <div class="text-sm text-gray-500">
+                  Quantity: {{item.quantity}}
+                </div>
+              </div>
+
             </div>
-            <div class="item-price">{{formatCurrency(item.price * item.quantity)}}</div>
+
+            <div class="font-semibold text-gray-700">
+              {{formatCurrency(item.price * item.quantity)}}
+            </div>
+
           </div>
+
         </div>
 
-        <!-- Order Actions -->
-        <div class="order-actions">
-          <button class="btn btn-outline view-details" (click)="viewOrderDetails(order.id)">
-            <i class="fas fa-eye"></i> View Details
+        <!-- ===== ORDER ACTIONS ===== -->
+        <div class="flex flex-wrap gap-3 px-6 py-4 border-t bg-gray-50">
+
+          <button
+            class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition"
+            (click)="viewOrderDetails(order.id)">
+            View Details
           </button>
-          
-          <button class="btn btn-outline track-order" (click)="trackOrder(order.id)">
-            <i class="fas fa-map-marker-alt"></i> Track Order
+
+          <button
+            class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition"
+            (click)="trackOrder(order.id)">
+            Track Order
           </button>
-          
-          <button class="btn btn-outline download-invoice" (click)="downloadInvoice(order.id)">
-            <i class="fas fa-download"></i> Invoice
+
+          <button
+            class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition"
+            (click)="downloadInvoice(order.id)">
+            Invoice
           </button>
-          
-          <button class="btn btn-primary reorder" (click)="reorderItems(order)">
-            <i class="fas fa-redo"></i> Reorder
+
+          <button
+            class="px-4 py-2 bg-orange-500 text-white rounded-lg hover:bg-orange-600 transition"
+            (click)="reorderItems(order)">
+            Reorder
           </button>
-          
-          <!-- Conditional Actions -->
-          <button class="btn btn-danger cancel-order" 
-                  (click)="cancelOrder(order.id)"
-                  *ngIf="order.status === 'Pending' || order.status === 'Confirmed'">
-            <i class="fas fa-times"></i> Cancel
+
+          <button
+            *ngIf="order.status === 'Pending' || order.status === 'Confirmed'"
+            class="px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition"
+            (click)="cancelOrder(order.id)">
+            Cancel
           </button>
-          
-          <button class="btn btn-outline return-order" 
-                  (click)="returnOrder(order.id)"
-                  *ngIf="order.status === 'Delivered'">
-            <i class="fas fa-undo"></i> Return
+
+          <button
+            *ngIf="order.status === 'Delivered'"
+            class="px-4 py-2 border rounded-lg hover:bg-gray-100 transition"
+            (click)="returnOrder(order.id)">
+            Return
           </button>
+
         </div>
 
-        <!-- Delivery Info -->
-        <div class="delivery-info" *ngIf="order.status !== 'Cancelled'">
-          <div class="delivery-address">
-            <i class="fas fa-map-marker-alt"></i>
-            <div class="address-text">
-              <div class="address-name">{{order.shippingAddress.name}}</div>
-              <div class="address-details">
-                {{order.shippingAddress.street}}, {{order.shippingAddress.city}}, 
-                {{order.shippingAddress.state}} {{order.shippingAddress.zipCode}}
+        <!-- ===== DELIVERY INFO ===== -->
+        <div *ngIf="order.status !== 'Cancelled'"
+             class="px-6 py-4 bg-gray-100 text-sm text-gray-600">
+
+          <div class="flex items-start gap-2">
+            <i class="fas fa-map-marker-alt text-orange-500 mt-1"></i>
+            <div>
+              <div class="font-semibold">
+                {{order.shippingAddress.name}}
+              </div>
+              <div>
+                {{order.shippingAddress.street}},
+                {{order.shippingAddress.city}},
+                {{order.shippingAddress.state}}
+                {{order.shippingAddress.zipCode}}
               </div>
             </div>
           </div>
-          
-          <div class="delivery-date" *ngIf="order.status !== 'Pending'">
-            <i class="fas fa-truck"></i>
+
+          <div *ngIf="order.status !== 'Pending'"
+               class="flex items-center gap-2 mt-3">
+            <i class="fas fa-truck text-orange-500"></i>
             <div>
-              <div class="date-label">Expected Delivery</div>
-              <div class="date-value">{{formatDate(order.deliveryDate)}}</div>
+              Expected Delivery:
+              {{formatDate(order.deliveryDate)}}
             </div>
           </div>
+
         </div>
+
       </div>
+
     </div>
 
-    <!-- Pagination (if needed) -->
-    <div class="pagination" *ngIf="filteredOrders.length > 10">
-      <button class="btn btn-outline" disabled>
-        <i class="fas fa-chevron-left"></i> Previous
-      </button>
-      <span class="page-info">Showing 1-10 of {{filteredOrders.length}} orders</span>
-      <button class="btn btn-outline">
-        Next <i class="fas fa-chevron-right"></i>
-      </button>
-    </div>
   </div>
 </div>

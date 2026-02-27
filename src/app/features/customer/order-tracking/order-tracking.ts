@@ -2,8 +2,9 @@ import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { ActivatedRoute, Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
+
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
+import { Navbar } from '../../../shared/components/navbar/navbar';
 
 interface TrackingStep {
   id: string;
@@ -40,7 +41,7 @@ interface OrderDetails {
 
 @Component({
   selector: 'app-order-tracking',
-  imports: [CommonModule, Sidebar],
+  imports: [CommonModule, Navbar],
   templateUrl: './order-tracking.html',
   styleUrl: './order-tracking.css'
 })
@@ -75,21 +76,25 @@ export class OrderTracking implements OnInit {
   }
 
   loadOrderTracking(orderId: string): void {
-    this.loading = true;
-    this.http.get<any>(`/api/orders/${orderId}/tracking`).subscribe({
-      next: (data) => {
-        this.orderDetails = data.order;
-        this.trackingSteps = data.tracking;
-        this.loading = false;
-      },
-      error: (error) => {
-        console.error('Error loading tracking:', error);
-        this.loading = false;
-        const mockData = this.generateMockTrackingData(orderId);
-        this.orderDetails = mockData.order;
-        this.trackingSteps = mockData.tracking;
-      }
-    });
+    this.loading = false;
+    // this.http.get<any>(`/api/orders/${orderId}/tracking`).subscribe({
+    //   next: (data) => {
+    //     this.orderDetails = data.order;
+    //     this.trackingSteps = data.tracking;
+    //     this.loading = false;
+    //   },
+    //   error: (error) => {
+    //     console.error('Error loading tracking:', error);
+    //     this.loading = false;
+    //     const mockData = this.generateMockTrackingData(orderId);
+    //     this.orderDetails = mockData.order;
+    //     this.trackingSteps = mockData.tracking;
+    //   }
+    // });
+   this.orderDetails = this.generateMockTrackingData(orderId).order;
+   this.trackingSteps = this.generateMockTrackingData(orderId).tracking;
+   console.log(this.orderDetails);
+   console.log(this.trackingSteps);
   }
 
   goBack(): void {
@@ -216,4 +221,20 @@ export class OrderTracking implements OnInit {
 
     return { order, tracking };
   }
+  getStatusColor(status: string): string {
+  switch (status) {
+    case 'Pending':
+      return 'bg-yellow-100 text-yellow-700';
+    case 'Confirmed':
+      return 'bg-blue-100 text-blue-700';
+    case 'Shipped':
+      return 'bg-purple-100 text-purple-700';
+    case 'Delivered':
+      return 'bg-green-100 text-green-700';
+    case 'Cancelled':
+      return 'bg-red-100 text-red-700';
+    default:
+      return 'bg-gray-100 text-gray-700';
+  }
+}
 }

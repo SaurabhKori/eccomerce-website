@@ -1,12 +1,15 @@
 import { Component, OnInit } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { ActivatedRoute, Router } from '@angular/router';
+import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
+
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
 import { Navbar } from '../../../shared/components/navbar/navbar';
 import { Footer } from '../../../shared/components/footer/footer';
+import { UiCardComponent } from '../../../shared/ui/card/ui-card.component';
+import { UiButtonComponent } from '../../../shared/ui/button/ui-button.component';
+import { UiBadgeComponent } from '../../../shared/ui/badge/ui-badge.component';
 
 // Import Math for template usage
 declare var Math: any;
@@ -42,7 +45,7 @@ interface Review {
 @Component({
   selector: 'app-product-detail',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Sidebar, Navbar, Footer],
+  imports: [CommonModule, FormsModule,RouterLink, ReactiveFormsModule, Navbar, Footer,UiCardComponent,UiButtonComponent,UiBadgeComponent],
   templateUrl: './product-detail.html',
   styleUrl: './product-detail.css'
 })
@@ -55,7 +58,11 @@ export class ProductDetail implements OnInit {
   selectedColor = '';
   quantity = 1;
   reviews: Review[] = [];
-  
+  relatedProducts = [
+  { name: 'Casual Shirt', price: 49, image: 'https://picsum.photos/300?10' },
+  { name: 'Sports Shoes', price: 89, image: 'https://picsum.photos/300?11' },
+  { name: 'Smart Watch', price: 199, image: 'https://picsum.photos/300?12' },
+];
   // Navigation items for sidebar
   navItems: NavItem[] = [
     { path: '/', label: 'Home', icon: 'fas fa-home' },
@@ -71,17 +78,35 @@ export class ProductDetail implements OnInit {
     private router: Router,
     private http: HttpClient
   ) {}
-
+finalPrice = 0;
   ngOnInit(): void {
     const productId = this.route.snapshot.paramMap.get('id');
-    if (productId) {
-      this.loadProduct(parseInt(productId));
-      this.loadReviews(parseInt(productId));
-    }
+    // if (productId) {
+     this.reviews = this.generateMockReviews();
+        this.product = this.generateMockProduct(1);
+        this.finalPrice = this.product.price;
+      // this.loadProduct(parseInt("1"));
+      // this.loadReviews(parseInt("1"));
+    // }
   }
 
+
+updatePrice() {
+  if (!this.product) return;
+  let base = this.product.price;
+
+  if (this.selectedSize === 'XL') {
+    base += 5;
+  }
+
+  if (this.selectedColor === 'red') {
+    base += 3;
+  }
+
+  this.finalPrice = base;
+}
   loadProduct(id: number): void {
-    this.loading = true;
+    this.loading = false;
     this.http.get<Product>(`/api/products/${id}`).subscribe({
       next: (product) => {
         this.product = product;
@@ -97,7 +122,7 @@ export class ProductDetail implements OnInit {
       error: (error) => {
         console.error('Error loading product:', error);
         this.loading = false;
-        this.product = this.generateMockProduct(id);
+        
       }
     });
   }
@@ -109,7 +134,7 @@ export class ProductDetail implements OnInit {
       },
       error: (error) => {
         console.error('Error loading reviews:', error);
-        this.reviews = this.generateMockReviews();
+       
       }
     });
   }
@@ -120,12 +145,14 @@ export class ProductDetail implements OnInit {
 
   selectSize(size: string): void {
     this.selectedSize = size;
+    this.updatePrice();
   }
 
   selectColor(color: string): void {
     this.selectedColor = color;
+    this.updatePrice();
   }
-
+ 
   updateQuantity(action: 'increase' | 'decrease'): void {
     if (action === 'increase') {
       this.quantity++;
@@ -134,28 +161,34 @@ export class ProductDetail implements OnInit {
     }
   }
 
-  addToCart(): void {
-    if (!this.product) return;
+  // addToCart(): void {
+  //   if (!this.product) return;
     
-    const cartItem = {
-      productId: this.product.id,
-      quantity: this.quantity,
-      size: this.selectedSize,
-      color: this.selectedColor
-    };
+  //   const cartItem = {
+  //     productId: this.product.id,
+  //     quantity: this.quantity,
+  //     size: this.selectedSize,
+  //     color: this.selectedColor
+  //   };
 
-    this.http.post('/api/cart/add', cartItem).subscribe({
-      next: () => {
-        alert('Product added to cart!');
-        this.router.navigate(['/cart']);
-      },
-      error: (error) => {
-        console.error('Error adding to cart:', error);
-        alert('Failed to add to cart. Please try again.');
-      }
-    });
-  }
+  //   this.http.post('/api/cart/add', cartItem).subscribe({
+  //     next: () => {
+  //       alert('Product added to cart!');
+  //       this.router.navigate(['/cart']);
+  //     },
+  //     error: (error) => {
+  //       console.error('Error adding to cart:', error);
+  //       alert('Failed to add to cart. Please try again.');
+  //     }
+  //   });
+  // }
+addToCart() {
+  this.showToast = true;
 
+  setTimeout(() => {
+    this.showToast = false;
+  }, 2000);
+}
   buyNow(): void {
     this.addToCart();
     this.router.navigate(['/checkout']);
@@ -186,9 +219,16 @@ export class ProductDetail implements OnInit {
     return Math.round(((originalPrice - currentPrice) / originalPrice) * 100);
   }
 
-  createArray(length: number): any[] {
-    return Array(length).fill(0);
+  createArray(length: any): number[] {
+
+  const safeLength = Math.floor(Number(length));
+
+  if (!safeLength || safeLength < 0 || isNaN(safeLength)) {
+    return [];
   }
+
+  return Array(safeLength).fill(0);
+}
 
   getRatingStars(rating: number): any[] {
     return this.createArray(Math.floor(rating || 0));
@@ -205,10 +245,10 @@ export class ProductDetail implements OnInit {
       price: 299.99,
       originalPrice: 399.99,
       images: [
-        `https://via.placeholder.com/600x600?text=Product+${id}+Image+1`,
-        `https://via.placeholder.com/600x600?text=Product+${id}+Image+2`,
-        `https://via.placeholder.com/600x600?text=Product+${id}+Image+3`,
-        `https://via.placeholder.com/600x600?text=Product+${id}+Image+4`
+        `/product/shirt.jpg`,
+        `/product/shirt.jpg`,
+        `/product/shirt.jpg`,
+        `/product/shirt.jpg`,
       ],
       rating: 4.5,
       reviews: 128,
@@ -251,4 +291,34 @@ export class ProductDetail implements OnInit {
       }
     ];
   }
+ getFullStars(rating: number): number[] {
+  const safe = Math.floor(Number(rating));
+  if (!safe || safe < 0) return [];
+  return Array(safe).fill(0);
+}
+
+hasHalfStar(rating: number): boolean {
+  return !!rating && rating % 1 !== 0;
+}
+
+// ⭐ Empty stars
+// getEmptyStars(): number[] {
+//   if (!this.product) return [];
+//   const rating = Number(this.product.rating) || 0;
+//   const full = Math.floor(rating);
+//   const half = this.hasHalfStar() ? 1 : 0;
+//   return this.createArray(5 - full - half);
+// }
+  showToast = false;
+getRatingPercentage(star: number): number {
+  const distribution: any = {
+    5: 60,
+    4: 25,
+    3: 10,
+    2: 3,
+    1: 2
+  };
+  return distribution[star] || 0;
+}
+
 }

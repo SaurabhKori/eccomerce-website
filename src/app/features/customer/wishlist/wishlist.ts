@@ -3,8 +3,10 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
+
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
+import { Navbar } from '../../../shared/components/navbar/navbar';
+import { Footer } from '../../../shared/components/footer/footer';
 
 // Import Math for template usage
 declare var Math: any;
@@ -27,7 +29,7 @@ interface WishlistItem {
 
 @Component({
   selector: 'app-wishlist',
-  imports: [CommonModule, Sidebar],
+  imports: [CommonModule, Navbar,Footer],
   templateUrl: './wishlist.html',
   styleUrl: './wishlist.css'
 })
@@ -52,7 +54,8 @@ export class Wishlist implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    this.loadWishlist();
+    // this.loadWishlist();
+     this.wishlistItems = this.generateMockWishlistItems();
   }
 
   loadWishlist(): void {
@@ -65,7 +68,7 @@ export class Wishlist implements OnInit {
       error: (error) => {
         console.error('Error loading wishlist:', error);
         this.loading = false;
-        this.wishlistItems = this.generateMockWishlistItems();
+       
       }
     });
   }

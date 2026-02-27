@@ -3,8 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
+
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
+import { Navbar } from '../../../shared/components/navbar/navbar';
+import { UiInputComponent } from '../../../shared/ui/input/ui-input.component';
+import { UiButtonComponent } from '../../../shared/ui/button/ui-button.component';
+import { UiCardComponent } from '../../../shared/ui/card/ui-card.component';
+import { UiBadgeComponent } from '../../../shared/ui/badge/ui-badge.component';
+import { Footer } from '../../../shared/components/footer/footer';
 
 interface CartItem {
   id: number;
@@ -29,7 +35,7 @@ interface CartSummary {
 
 @Component({
   selector: 'app-cart',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Sidebar],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar,Footer,UiCardComponent,UiBadgeComponent,UiButtonComponent,UiInputComponent],
   templateUrl: './cart.html',
   styleUrl: './cart.css'
 })
@@ -68,7 +74,9 @@ export class Cart implements OnInit {
   }
 
   ngOnInit(): void {
-    this.loadCart();
+    // this.loadCart();
+     this.cartItems = this.generateMockCartItems();
+        this.calculateSummary();
   }
 
   loadCart(): void {

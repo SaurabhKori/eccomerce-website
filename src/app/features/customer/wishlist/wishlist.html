@@ -1,103 +1,236 @@
-<div class="wishlist-page">
-  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
-  
-  <div class="wishlist-main" [class.sidebar-collapsed]="sidebarCollapsed">
-    <div class="page-header">
-      <h1>My Wishlist</h1>
-      <div class="header-actions">
-        <button class="btn btn-outline" (click)="routes('/products')">
-          <i class="fas fa-arrow-left"></i>
-          Continue Shopping
-        </button>
-      </div>
+<div class="min-h-screen bg-gray-50">
+
+<app-navbar></app-navbar>
+
+  <!-- Main -->
+  <div class="flex-1 p-6 lg:p-10">
+
+    <!-- HEADER -->
+    <div class="flex flex-col md:flex-row md:justify-between md:items-center
+                border-b pb-6 mb-8 gap-4">
+
+      <h1 class="text-3xl font-bold text-gray-800">
+        My Wishlist
+      </h1>
+
+      <button
+        (click)="routes('/products')"
+        class="px-6 py-3 border-2 border-orange-500
+               text-orange-500 rounded-2xl
+               font-semibold hover:bg-orange-500
+               hover:text-white transition">
+
+        <i class="fas fa-arrow-left mr-2"></i>
+        Continue Shopping
+      </button>
+
     </div>
 
-    <div *ngIf="loading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading wishlist...</p>
+    <!-- LOADING -->
+    <div *ngIf="loading"
+         class="flex flex-col items-center py-20 text-orange-500">
+
+      <i class="fas fa-spinner fa-spin text-3xl"></i>
+      <p class="mt-4 text-gray-500">Loading wishlist...</p>
+
     </div>
 
-    <div *ngIf="!loading && wishlistItems.length === 0" class="empty-wishlist">
-      <i class="far fa-heart"></i>
-      <h3>Your wishlist is empty</h3>
-      <p>Save items you love for later!</p>
-      <button class="btn btn-primary" (click)="routes('/products')">
+    <!-- EMPTY STATE -->
+    <div *ngIf="!loading && wishlistItems.length === 0"
+         class="flex flex-col items-center text-center py-24">
+
+      <i class="far fa-heart text-6xl text-gray-300 mb-6"></i>
+
+      <h3 class="text-xl font-semibold mb-2">
+        Your wishlist is empty
+      </h3>
+
+      <p class="text-gray-500 mb-6">
+        Save items you love for later!
+      </p>
+
+      <button
+        (click)="routes('/products')"
+        class="px-8 py-4 bg-orange-500
+               hover:bg-orange-600 text-white
+               rounded-2xl font-semibold transition">
+
         Start Shopping
       </button>
+
     </div>
 
-    <div *ngIf="!loading && wishlistItems.length > 0" class="wishlist-content">
-      <div class="wishlist-grid">
-        <div *ngFor="let item of wishlistItems" class="wishlist-item">
-          <div class="item-image">
-            <img [src]="item.product.image" [alt]="item.product.name" (click)="viewProduct(item.productId)">
+    <!-- CONTENT -->
+    <div *ngIf="!loading && wishlistItems.length > 0"
+         class="grid grid-cols-1 xl:grid-cols-3 gap-10">
+
+      <!-- LEFT: ITEMS -->
+      <div class="xl:col-span-2 space-y-6">
+
+        <div *ngFor="let item of wishlistItems"
+             class="bg-white rounded-2xl shadow-md p-6
+                    flex flex-col lg:flex-row gap-6
+                    hover:shadow-lg transition">
+
+          <!-- IMAGE -->
+          <div class="cursor-pointer"
+               (click)="viewProduct(item.productId)">
+
+            <img [src]="item.product.image"
+                 class="w-full lg:w-52 h-52
+                        object-cover rounded-2xl
+                        hover:scale-105 transition">
           </div>
-          
-          <div class="item-details">
-            <h3 class="item-name" (click)="viewProduct(item.productId)">{{item.product.name}}</h3>
-            
-            <div class="item-rating">
-              <i class="fas fa-star" *ngFor="let star of getRatingStars(item.product.rating)"></i>
-              <i class="fas fa-star-half-alt" *ngIf="item.product.rating % 1 !== 0"></i>
-              <span class="rating-text">{{item.product.rating}} ({{item.product.reviews}} reviews)</span>
+
+          <!-- DETAILS -->
+          <div class="flex-1 space-y-4">
+
+            <h3 class="text-xl font-semibold text-gray-800
+                       hover:text-orange-500 cursor-pointer transition"
+                (click)="viewProduct(item.productId)">
+              {{item.product.name}}
+            </h3>
+
+            <!-- RATING -->
+            <div class="flex items-center gap-2 text-yellow-500 text-sm">
+              <i class="fas fa-star"
+                 *ngFor="let star of getRatingStars(item.product.rating)">
+              </i>
+
+              <i class="fas fa-star-half-alt"
+                 *ngIf="item.product.rating % 1 !== 0">
+              </i>
+
+              <span class="text-gray-500 ml-2">
+                {{item.product.rating}} ({{item.product.reviews}} reviews)
+              </span>
             </div>
-            
-            <div class="item-price">
-              <span class="current-price">{{formatCurrency(item.product.price)}}</span>
-              <span *ngIf="item.product.originalPrice" class="original-price">
+
+            <!-- PRICE -->
+            <div class="flex items-center gap-4">
+
+              <span class="text-2xl font-bold text-orange-600">
+                {{formatCurrency(item.product.price)}}
+              </span>
+
+              <span *ngIf="item.product.originalPrice"
+                    class="line-through text-gray-400">
                 {{formatCurrency(item.product.originalPrice)}}
               </span>
-              <span *ngIf="item.product.originalPrice" class="discount-badge">
+
+              <span *ngIf="item.product.originalPrice"
+                    class="bg-green-100 text-green-600
+                           px-3 py-1 rounded-full text-xs font-semibold">
                 -{{getDiscountPercentage(item.product.originalPrice, item.product.price)}}%
               </span>
+
             </div>
-            
-            <div class="item-stock">
-              <span [class]="item.product.stock > 10 ? 'in-stock' : 'low-stock'">
-                {{item.product.stock > 10 ? '✓ In Stock' : `Only ${item.product.stock} left`}}
-              </span>
+
+            <!-- STOCK -->
+            <div class="text-sm font-semibold"
+                 [ngClass]="item.product.stock > 10 ? 'text-green-600' : 'text-yellow-500'">
+
+              {{item.product.stock > 10 ? '✓ In Stock' : 'Only ' + item.product.stock + ' left'}}
+
             </div>
+
           </div>
-          
-          <div class="item-actions">
-            <button class="btn btn-primary add-to-cart" (click)="addToCart(item.productId)">
-              <i class="fas fa-shopping-cart"></i> Add to Cart
+
+          <!-- ACTIONS -->
+          <div class="flex flex-col gap-3 justify-center">
+
+            <button
+              (click)="addToCart(item.productId)"
+              class="px-5 py-3 bg-orange-500
+                     hover:bg-orange-600
+                     text-white rounded-2xl
+                     font-semibold transition">
+
+              <i class="fas fa-shopping-cart mr-2"></i>
+              Add to Cart
             </button>
-            <button class="btn btn-outline move-to-cart" (click)="moveToCart(item)">
-              <i class="fas fa-exchange-alt"></i> Move to Cart
+
+            <button
+              (click)="moveToCart(item)"
+              class="px-5 py-3 border border-orange-500
+                     text-orange-500 rounded-2xl
+                     font-semibold hover:bg-orange-500
+                     hover:text-white transition">
+
+              Move to Cart
             </button>
-            <button class="btn btn-danger remove" (click)="removeFromWishlist(item.id)">
-              <i class="far fa-trash"></i> Remove
+
+            <button
+              (click)="removeFromWishlist(item.id)"
+              class="px-5 py-3 bg-red-500
+                     hover:bg-red-600 text-white
+                     rounded-2xl font-semibold transition">
+
+              <i class="far fa-trash mr-2"></i>
+              Remove
             </button>
+
           </div>
+
         </div>
+
       </div>
-      
-      <div class="wishlist-summary">
-        <div class="summary-card">
-          <h3>Wishlist Summary</h3>
-          <div class="summary-stats">
-            <div class="stat">
-              <span class="stat-number">{{wishlistItems.length}}</span>
-              <span class="stat-label">Items</span>
+
+      <!-- RIGHT: SUMMARY -->
+      <div class="bg-white rounded-2xl shadow-md p-6 h-fit xl:sticky xl:top-24 space-y-6">
+
+        <h3 class="text-xl font-bold">
+          Wishlist Summary
+        </h3>
+
+        <div class="grid grid-cols-2 gap-4">
+
+          <div class="bg-gray-100 rounded-2xl p-5 text-center">
+            <div class="text-2xl font-bold text-orange-600">
+              {{wishlistItems.length}}
             </div>
-            <div class="stat">
-              <span class="stat-number">
-                {{formatCurrency(getWishlistTotal())}}
-              </span>
-              <span class="stat-label">Total Value</span>
+            <div class="text-gray-500 text-sm">
+              Items
             </div>
           </div>
-          <div class="summary-actions">
-            <button class="btn btn-primary" (click)="addAllToCart()">
-              <i class="fas fa-shopping-cart"></i> Add All to Cart
-            </button>
-            <button class="btn btn-outline" (click)="clearWishlist()">
-              <i class="far fa-trash"></i> Clear Wishlist
-            </button>
+
+          <div class="bg-gray-100 rounded-2xl p-5 text-center">
+            <div class="text-2xl font-bold text-orange-600">
+              {{formatCurrency(getWishlistTotal())}}
+            </div>
+            <div class="text-gray-500 text-sm">
+              Total Value
+            </div>
           </div>
+
         </div>
+
+        <button
+          (click)="addAllToCart()"
+          class="w-full py-3 bg-orange-500
+                 hover:bg-orange-600
+                 text-white rounded-2xl
+                 font-semibold transition">
+
+          <i class="fas fa-shopping-cart mr-2"></i>
+          Add All to Cart
+        </button>
+
+        <button
+          (click)="clearWishlist()"
+          class="w-full py-3 border border-orange-500
+                 text-orange-500 rounded-2xl
+                 font-semibold hover:bg-orange-500
+                 hover:text-white transition">
+
+          <i class="far fa-trash mr-2"></i>
+          Clear Wishlist
+        </button>
+
       </div>
+
     </div>
+
   </div>
+<app-footer></app-footer>
 </div>

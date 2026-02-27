@@ -3,8 +3,11 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
+import { Navbar } from '../../../shared/components/navbar/navbar';
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
+import { UiInputComponent } from '../../../shared/ui/input/ui-input.component';
+import { UiCardComponent } from '../../../shared/ui/card/ui-card.component';
+import { UiButtonComponent } from '../../../shared/ui/button/ui-button.component';
 
 interface Address {
   id: number;
@@ -39,7 +42,7 @@ interface OrderSummary {
 
 @Component({
   selector: 'app-checkout',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Sidebar],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar,UiCardComponent,UiButtonComponent,UiInputComponent],
   templateUrl: './checkout.html',
   styleUrl: './checkout.css'
 })

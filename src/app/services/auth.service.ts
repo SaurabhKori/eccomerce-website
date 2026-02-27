@@ -1,5 +1,6 @@
 import { Injectable } from '@angular/core';
-import { BehaviorSubject, Observable } from 'rxjs';
+import { HttpClient } from '@angular/common/http';
+import { Observable, of } from 'rxjs';
 
 export interface User {
   id: number;
@@ -8,65 +9,35 @@ export interface User {
   lastName: string;
   role: 'admin' | 'seller' | 'customer';
   avatar?: string;
-  token?: string;
+  token: string;
+}
+
+export interface LoginRequest {
+  email: string;
+  password: string;
 }
 
 @Injectable({
   providedIn: 'root'
 })
 export class AuthService {
-  private currentUserSubject = new BehaviorSubject<User | null>(null);
-  public currentUser$: Observable<User | null>;
 
-  constructor() {
-    this.currentUser$ = this.currentUserSubject.asObservable();
-    
-    // Check for stored user on initialization
-    const storedUser = localStorage.getItem('currentUser');
-    if (storedUser) {
-      this.currentUserSubject.next(JSON.parse(storedUser));
-    }
+  private apiUrl = 'http://localhost:8080/api/auth';
+
+  constructor(private http: HttpClient) {}
+
+  // ============================
+  // REAL BACKEND LOGIN
+  // ============================
+  login(credentials: LoginRequest): Observable<User> {
+    return this.http.post<User>(`${this.apiUrl}/login`, credentials);
   }
 
-  public get currentUser(): User | null {
-    return this.currentUserSubject.value;
-  }
+  // ============================
+  // MOCK LOGIN (FOR TESTING)
+  // ============================
+  mockLogin(email: string, password: string): Observable<User | null> {
 
-  login(user: User): void {
-    // Store user in localStorage
-    localStorage.setItem('currentUser', JSON.stringify(user));
-    this.currentUserSubject.next(user);
-  }
-
-  logout(): void {
-    // Remove user from localStorage
-    localStorage.removeItem('currentUser');
-    this.currentUserSubject.next(null);
-  }
-
-  isLoggedIn(): boolean {
-    return !!this.currentUser;
-  }
-
-  hasRole(role: string): boolean {
-    return this.currentUser?.role === role;
-  }
-
-  isAdmin(): boolean {
-    return this.currentUser?.role === 'admin';
-  }
-
-  isSeller(): boolean {
-    return this.currentUser?.role === 'seller';
-  }
-
-  isCustomer(): boolean {
-    return this.currentUser?.role === 'customer';
-  }
-
-  // Mock login method for testing
-  mockLogin(email: string, password: string): User | null {
-    // Mock users for testing
     const mockUsers: User[] = [
       {
         id: 1,
@@ -74,7 +45,8 @@ export class AuthService {
         firstName: 'Admin',
         lastName: 'User',
         role: 'admin',
-        avatar: 'https://via.placeholder.com/150x150?text=Admin'
+        avatar: 'https://via.placeholder.com/150x150?text=Admin',
+        token: 'mock-admin-token'
       },
       {
         id: 2,
@@ -82,7 +54,8 @@ export class AuthService {
         firstName: 'Seller',
         lastName: 'User',
         role: 'seller',
-        avatar: 'https://via.placeholder.com/150x150?text=Seller'
+        avatar: 'https://via.placeholder.com/150x150?text=Seller',
+        token: 'mock-seller-token'
       },
       {
         id: 3,
@@ -90,16 +63,37 @@ export class AuthService {
         firstName: 'Customer',
         lastName: 'User',
         role: 'customer',
-        avatar: 'https://via.placeholder.com/150x150?text=Customer'
+        avatar: 'https://via.placeholder.com/150x150?text=Customer',
+        token: 'mock-customer-token'
       }
     ];
 
     const user = mockUsers.find(u => u.email === email);
+
     if (user && password === 'password') {
-      this.login(user);
-      return user;
+      return of(user);
     }
-    
-    return null;
+
+    return of(null);
+  }
+
+  // ============================
+  // TOKEN MANAGEMENT
+  // ============================
+
+  saveToken(token: string): void {
+    localStorage.setItem('token', token);
+  }
+
+  getToken(): string | null {
+    return localStorage.getItem('token');
+  }
+
+  clearToken(): void {
+    localStorage.removeItem('token');
+  }
+
+  isLoggedIn(): boolean {
+    return !!this.getToken();
   }
 }

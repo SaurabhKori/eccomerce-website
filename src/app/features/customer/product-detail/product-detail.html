@@ -1,165 +1,271 @@
-<div class="product-detail-page">
+<div class="bg-gray-50 min-h-screen">
+
   <app-navbar></app-navbar>
-  
-  <div class="product-detail-container">
-    <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
-  
-  <div class="product-detail-main" [class.sidebar-collapsed]="sidebarCollapsed">
-    <div class="breadcrumb">
-      <a href="/">Home</a> / 
-      <a href="/products">Products</a> / 
-      <span *ngIf="product">{{product.name}}</span>
+
+  <div class="max-w-7xl mx-auto px-6 py-10">
+
+    <!-- MAIN PRODUCT SECTION -->
+    <ui-card class="p-8" *ngIf="product">
+
+  <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
+
+    <!-- LEFT: IMAGE SECTION -->
+    <div>
+
+      <!-- MAIN IMAGE -->
+      <div class="overflow-hidden rounded-2xl border group">
+        <img
+          [src]="product.images[selectedImageIndex]"
+          class="w-full h-[500px] object-cover transition duration-500 group-hover:scale-110"
+        />
+      </div>
+
+      <!-- THUMBNAILS -->
+      <div class="flex gap-4 mt-6">
+        <img
+          *ngFor="let img of product.images; let i=index"
+          [src]="img"
+          (click)="selectedImageIndex = i"
+          class="w-20 h-20 object-cover rounded-2xl cursor-pointer border-2 transition"
+          [ngClass]="{
+            'border-orange-500 scale-105': i === selectedImageIndex,
+            'border-gray-200 hover:border-orange-400': i !== selectedImageIndex
+          }"
+        />
+      </div>
+
     </div>
 
-    <div *ngIf="loading" class="loading">
-      <div class="spinner"></div>
-      <p>Loading product details...</p>
-    </div>
+    <!-- RIGHT: PRODUCT INFO -->
+    <div>
 
-    <div *ngIf="!loading && product" class="product-content">
-      <div class="product-images-section">
-        <div class="main-image">
-          <img [src]="product.images[selectedImageIndex]" [alt]="product.name">
+      <h1 class="text-3xl font-bold text-gray-900 mb-4">
+        {{product.name}}
+      </h1>
+
+      <!-- RATING -->
+      <div class="flex items-center gap-3 mb-4">
+        <div class="text-yellow-500">
+          <i class="fas fa-star"
+             *ngFor="let s of getFullStars(product.rating)">
+          </i>
+          <i class="fas fa-star-half-alt"
+             *ngIf="hasHalfStar(product.rating)">
+          </i>
         </div>
-        <div class="thumbnail-images">
-          <div 
-            *ngFor="let image of product.images; let i = index" 
-            class="thumbnail"
-            [class.active]="i === selectedImageIndex"
-            (click)="selectImage(i)"
-          >
-            <img [src]="image" [alt]="`${product.name} ${i+1}`">
+        <span class="text-gray-500 text-sm font-semibold">
+          ({{product.reviews}} Reviews)
+        </span>
+      </div>
+
+      <!-- PRICE -->
+      <div class="flex items-center gap-4 mb-6">
+        <span class="text-3xl font-bold text-orange-500">
+          {{ formatCurrency(finalPrice) }}
+        </span>
+
+        <span *ngIf="product.originalPrice"
+              class="line-through text-gray-400 font-semibold">
+          {{ formatCurrency(product.originalPrice) }}
+        </span>
+
+        <ui-badge *ngIf="product.originalPrice"
+                  class="bg-red-100 text-red-600">
+          -{{getDiscountPercentage(product.originalPrice, product.price)}}%
+        </ui-badge>
+      </div>
+
+      <!-- DESCRIPTION -->
+      <p class="text-gray-600 leading-relaxed mb-8">
+        {{product.description}}
+      </p>
+
+      <!-- SIZE -->
+      <div *ngIf="product.variants.size?.length" class="mb-6">
+        <h4 class="font-semibold mb-3">Size</h4>
+        <div class="flex gap-3 flex-wrap">
+          <ui-button
+            *ngFor="let size of product.variants.size"
+            variant="outline"
+            (click)="selectSize(size)"
+            [ngClass]="{
+              'bg-orange-500 text-white': selectedSize === size
+            }">
+            {{size}}
+          </ui-button>
+        </div>
+      </div>
+
+      <!-- COLOR -->
+      <div *ngIf="product.variants.color?.length" class="mb-6">
+        <h4 class="font-semibold mb-3">Color</h4>
+        <div class="flex gap-4">
+          <div
+            *ngFor="let color of product.variants.color"
+            (click)="selectColor(color)"
+            class="w-9 h-9 rounded-full cursor-pointer border-2 transition"
+            [ngClass]="{
+              'border-orange-500 scale-110': selectedColor === color,
+              'border-gray-300 hover:border-orange-400': selectedColor !== color
+            }"
+            [style.background]="color">
           </div>
         </div>
       </div>
 
-      <div class="product-info-section">
-        <div class="product-header">
-          <h1 class="product-name">{{product.name}}</h1>
-          <div class="product-meta">
-            <div class="rating">
-              <i class="fas fa-star"></i>
-              <span>{{product.rating}}</span>
-              <span class="reviews-count">({{product.reviews}} reviews)</span>
-            </div>
-            <div class="brand">Brand: {{product.brand}}</div>
-          </div>
-        </div>
+      <!-- STOCK -->
+      <div class="mb-6">
+        <ui-badge class="bg-green-100 text-green-600">
+          ✓ In Stock
+        </ui-badge>
+      </div>
 
-        <div class="product-price">
-          <span class="current-price">{{formatCurrency(product.price)}}</span>
-          <span *ngIf="product.originalPrice" class="original-price">
-            {{formatCurrency(product.originalPrice)}}
+      <!-- PURCHASE SECTION (NORMAL, NOT STICKY) -->
+      <div class="border border-orange-100 rounded-2xl p-6 space-y-5 bg-orange-50/30">
+
+        <!-- Quantity -->
+        <div class="flex items-center gap-4">
+          <ui-button variant="outline"
+                     (click)="updateQuantity('decrease')">
+            -
+          </ui-button>
+
+          <span class="text-lg font-bold">
+            {{quantity}}
           </span>
-          <span *ngIf="product.originalPrice" class="discount-badge">
-            -{{getDiscountPercentage(product.originalPrice, product.price)}}%
-          </span>
+
+          <ui-button variant="outline"
+                     (click)="updateQuantity('increase')">
+            +
+          </ui-button>
         </div>
 
-        <div class="product-description">
-          <h3>Description</h3>
-          <p>{{product.description}}</p>
-        </div>
+        <!-- Buttons -->
+           <div class="flex gap-1">
+        <ui-button variant="primary"
+                   size="lg"
+                  
+                   (click)="addToCart()">
+          Add to Cart
+        </ui-button>
 
-        <div class="product-variants" *ngIf="product.variants.size?.length || product.variants.color?.length">
-          <div class="size-selector" *ngIf="product.variants.size?.length">
-            <h4>Size</h4>
-            <div class="size-options">
-              <button 
-                *ngFor="let size of product.variants.size" 
-                class="size-btn"
-                [class.selected]="selectedSize === size"
-                (click)="selectSize(size)"
-              >
-                {{size}}
-              </button>
-            </div>
-          </div>
-
-          <div class="color-selector" *ngIf="product.variants.color?.length">
-            <h4>Color</h4>
-            <div class="color-options">
-              <button 
-                *ngFor="let color of product.variants.color" 
-                class="color-btn"
-                [class.selected]="selectedColor === color"
-                [style.background-color]="color.toLowerCase()"
-                (click)="selectColor(color)"
-                [title]="color"
-              ></button>
-            </div>
-          </div>
-        </div>
-
-        <div class="stock-info">
-          <span [class]="product.stock > 10 ? 'in-stock' : 'low-stock'">
-            {{product.stock > 10 ? '✓ In Stock' : `Only ${product.stock} left`}}
-          </span>
-        </div>
-
-        <div class="purchase-section">
-          <div class="quantity-selector">
-            <label>Quantity:</label>
-            <div class="quantity-controls">
-              <button class="quantity-btn" (click)="updateQuantity('decrease')" [disabled]="quantity <= 1">
-                <i class="fas fa-minus"></i>
-              </button>
-              <input type="number" [(ngModel)]="quantity" min="1" [max]="product.stock">
-              <button class="quantity-btn" (click)="updateQuantity('increase')" [disabled]="quantity >= product.stock">
-                <i class="fas fa-plus"></i>
-              </button>
-            </div>
-          </div>
-
-          <div class="action-buttons">
-            <button class="btn btn-primary add-to-cart" (click)="addToCart()">
-              <i class="fas fa-shopping-cart"></i> Add to Cart
-            </button>
-            <button class="btn btn-success buy-now" (click)="buyNow()">
-              <i class="fas fa-bolt"></i> Buy Now
-            </button>
-            <button class="btn btn-outline wishlist" (click)="addToWishlist()">
-              <i class="far fa-heart"></i>
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-    <div *ngIf="!loading && product" class="product-reviews">
-      <h2>Customer Reviews</h2>
-      <div class="reviews-summary">
-        <div class="average-rating">
-          <div class="rating-number">{{product.rating}}</div>
-          <div class="rating-stars">
-            <i class="fas fa-star" *ngFor="let star of getRatingStars(product.rating)"></i>
-            <i class="fas fa-star-half-alt" *ngIf="product.rating % 1 !== 0"></i>
-          </div>
-          <div class="total-reviews">{{product.reviews}} Reviews</div>
-        </div>
+        <ui-button variant="primary"
+                   size="lg"
+                   
+                   (click)="buyNow()">
+          Buy Now
+        </ui-button>
+</div>
       </div>
 
-      <div class="reviews-list">
-        <div *ngFor="let review of reviews" class="review-item">
-          <div class="review-header">
-            <div class="reviewer-info">
-              <span class="reviewer-name">{{review.userName}}</span>
-              <span *ngIf="review.verified" class="verified-badge">
-                <i class="fas fa-check-circle"></i> Verified Purchase
-              </span>
-            </div>
-            <div class="review-date">{{review.date}}</div>
-          </div>
-          <div class="review-rating">
-            <i class="fas fa-star" *ngFor="let star of createArray(review.rating)"></i>
-            <i class="far fa-star" *ngFor="let star of createArray(5 - review.rating)"></i>
-          </div>
-          <div class="review-comment">{{review.comment}}</div>
-        </div>
-      </div>
     </div>
-    </div>
+
   </div>
-  
+
+</ui-card>
+
+    <!-- REVIEW BREAKDOWN -->
+    <div class="mt-16">
+
+      <ui-card class="p-6 mb-6" *ngIf="product">
+
+        <div class="grid grid-cols-2 gap-6">
+
+          <div>
+            <div class="text-4xl font-bold text-orange-500">
+              {{product.rating}}
+            </div>
+            <div class="text-gray-500">
+              Based on {{product.reviews}} reviews
+            </div>
+          </div>
+
+          <div class="space-y-2">
+
+            <div *ngFor="let star of [5,4,3,2,1]"
+                 class="flex items-center gap-3">
+
+              <span class="w-6">{{star}}★</span>
+
+              <div class="flex-1 bg-gray-200 h-2 rounded-full overflow-hidden">
+                <div class="bg-orange-500 h-2"
+                     [style.width.%]="getRatingPercentage(star)">
+                </div>
+              </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+      </ui-card>
+
+      <!-- REVIEWS LIST -->
+      <ui-card *ngFor="let review of reviews"
+               class="p-6 mb-4" >
+
+        <div class="flex justify-between mb-2">
+          <span class="font-semibold">
+            {{review.userName}}
+          </span>
+          <span class="text-gray-400 text-sm">
+            {{review.date}}
+          </span>
+        </div>
+
+        <div class="text-yellow-500 mb-2">
+          <i class="fas fa-star"
+             *ngFor="let s of createArray(review.rating)">
+          </i>
+        </div>
+
+        <p class="text-gray-600">
+          {{review.comment}}
+        </p>
+
+      </ui-card>
+
+    </div>
+
+    <!-- RELATED PRODUCTS -->
+    <div class="mt-16">
+
+      <h2 class="text-2xl font-bold mb-6">
+        Related Products
+      </h2>
+
+      <div class="flex gap-6 overflow-x-auto pb-4">
+
+        <ui-card
+          *ngFor="let item of relatedProducts"
+          class="min-w-[250px] p-4 hover:shadow-lg transition">
+
+          <img [src]="item.image"
+               class="h-40 w-full object-cover rounded-xl mb-4">
+
+          <div class="font-semibold mb-1">
+            {{item.name}}
+          </div>
+
+          <div class="text-orange-500 font-bold">
+            {{formatCurrency(item.price)}}
+          </div>
+
+        </ui-card>
+
+      </div>
+
+    </div>
+
+  </div>
+
+  <!-- TOAST -->
+  <div *ngIf="showToast"
+       class="fixed bottom-6 right-6 bg-orange-500 text-white px-6 py-3 rounded-2xl shadow-lg animate-bounce">
+    Product added to cart!
+  </div>
+
   <app-footer></app-footer>
+
 </div>

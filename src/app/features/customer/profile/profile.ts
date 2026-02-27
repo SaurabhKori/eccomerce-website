@@ -3,10 +3,14 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup, Validators } from '@angular/forms';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
+
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
 import { Navbar } from '../../../shared/components/navbar/navbar';
 import { Footer } from '../../../shared/components/footer/footer';
+import { UiButtonComponent } from '../../../shared/ui/button/ui-button.component';
+import { UiCardComponent } from '../../../shared/ui/card/ui-card.component';
+import { UiInputComponent } from '../../../shared/ui/input/ui-input.component';
+import { UiBadgeComponent } from '../../../shared/ui/badge/ui-badge.component';
 
 interface Address {
   id: number;
@@ -44,7 +48,7 @@ interface UserProfile {
 @Component({
   selector: 'app-profile',
   standalone: true,
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Sidebar, Navbar, Footer],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, UiButtonComponent,UiCardComponent, UiInputComponent,UiBadgeComponent, Navbar, Footer],
   templateUrl: './profile.html',
   styleUrl: './profile.css'
 })
@@ -61,7 +65,8 @@ export class Profile implements OnInit {
   personalForm: FormGroup;
   passwordForm: FormGroup;
   addressForm: FormGroup;
-  
+   previewImage: string | ArrayBuffer | null = null;
+selectedFile: File | null = null;
   // UI State
   loading = false;
   saving = false;
@@ -398,4 +403,35 @@ export class Profile implements OnInit {
       }
     ];
   }
+ onImageSelected(event: Event): void {
+  const input = event.target as HTMLInputElement;
+
+  if (!input.files || input.files.length === 0) {
+    return;
+  }
+
+  const file = input.files[0];
+
+  // Validate file type
+  if (!file.type.startsWith('image/')) {
+    alert('Please select a valid image file.');
+    return;
+  }
+
+  // Optional: Validate size (2MB max)
+  if (file.size > 2 * 1024 * 1024) {
+    alert('Image size should be less than 2MB.');
+    return;
+  }
+
+  this.selectedFile = file;
+
+  const reader = new FileReader();
+
+  reader.onload = () => {
+    this.previewImage = reader.result;
+  };
+
+  reader.readAsDataURL(file);
+}
 }

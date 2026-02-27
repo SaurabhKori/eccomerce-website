@@ -1,195 +1,77 @@
 <div class="products-page">
+
   <app-navbar></app-navbar>
-  
-  <div class="products-container">
-    <div class="container">
-    <!-- Page Header -->
-    <div class="page-header">
-      <h1>Products</h1>
-      <div class="results-count">
-        Showing {{paginatedProducts.length}} of {{filteredProducts.length}} products
-      </div>
-    </div>
 
-    <div class="products-main">
-      <!-- Filters Sidebar -->
-      <aside class="filters-sidebar">
-        <div class="filters-header">
-          <h3>Filters</h3>
-          <button class="clear-filters-btn" (click)="clearFilters()">Clear All</button>
-        </div>
-
-        <form [formGroup]="filterForm" class="filters-form">
-          <!-- Search -->
-          <div class="filter-group">
-            <label>Search</label>
-            <input type="text" formControlName="search" placeholder="Search products..." class="form-control">
-          </div>
-
-          <!-- Category Filter -->
-          <div class="filter-group">
-            <label>Category</label>
-            <select formControlName="category" class="form-control">
-              <option value="">All Categories</option>
-              <option *ngFor="let category of filterOptions.categories" [value]="category">
-                {{category}}
-              </option>
-            </select>
-          </div>
-
-          <!-- Brand Filter -->
-          <div class="filter-group">
-            <label>Brand</label>
-            <select formControlName="brand" class="form-control">
-              <option value="">All Brands</option>
-              <option *ngFor="let brand of filterOptions.brands" [value]="brand">
-                {{brand}}
-              </option>
-            </select>
-          </div>
-
-          <!-- Price Range -->
-          <div class="filter-group">
-            <label>Price Range</label>
-            <div class="price-range">
-              <input type="number" formControlName="minPrice" placeholder="Min" class="form-control">
-              <span>to</span>
-              <input type="number" formControlName="maxPrice" placeholder="Max" class="form-control">
-            </div>
-          </div>
-
-          <!-- Rating Filter -->
-          <div class="filter-group">
-            <label>Minimum Rating</label>
-            <select formControlName="rating" class="form-control">
-              <option value="">All Ratings</option>
-              <option value="4">4+ Stars</option>
-              <option value="3">3+ Stars</option>
-              <option value="2">2+ Stars</option>
-              <option value="1">1+ Stars</option>
-            </select>
-          </div>
-        </form>
-      </aside>
-
-      <!-- Products Content -->
-      <main class="products-content">
-        <!-- Sort Bar -->
-        <div class="sort-bar">
-          <div class="sort-options">
-            <label>Sort by:</label>
-            <select [(ngModel)]="sortBy" (change)="applySorting()" class="form-control">
-              <option value="popularity">Popularity</option>
-              <option value="price-low">Price: Low to High</option>
-              <option value="price-high">Price: High to Low</option>
-              <option value="newest">Newest</option>
-              <option value="rating">Rating</option>
-            </select>
-          </div>
-          
-          <div class="view-toggle">
-            <button class="view-btn active" title="Grid View">
-              <i class="fas fa-th"></i>
-            </button>
-            <button class="view-btn" title="List View">
-              <i class="fas fa-list"></i>
-            </button>
-          </div>
-        </div>
-
-        <!-- Products Grid -->
-        <div class="products-grid" *ngIf="!loading && filteredProducts.length > 0">
-          <div class="product-card" *ngFor="let product of paginatedProducts" (click)="viewProduct(product.id)">
-            <div class="product-image">
-              <img [src]="product.image" [alt]="product.name">
-              <div class="product-badges">
-                <span class="badge badge-discount" *ngIf="product.originalPrice">
-                  -{{getDiscountPercentage(product.originalPrice, product.price)}}%
-                </span>
-                <span class="badge badge-low-stock" *ngIf="product.stock <= 5">
-                  Low Stock
-                </span>
-              </div>
-              <div class="product-actions">
-                <button class="action-btn wishlist" (click)="addToWishlist(product); $event.stopPropagation()">
-                  <i class="far fa-heart"></i>
-                </button>
-                <button class="action-btn cart" (click)="addToCart(product); $event.stopPropagation()">
-                  <i class="fas fa-shopping-cart"></i>
-                </button>
-              </div>
-            </div>
-            <div class="product-info">
-              <h3 class="product-name">{{product.name}}</h3>
-              <div class="product-meta">
-                <span class="brand">{{product.brand}}</span>
-                <span class="category">{{product.category}}</span>
-              </div>
-              <div class="product-rating">
-                <div class="stars">
-                  <i class="fas fa-star" *ngFor="let star of createArray(product.rating)"></i>
-                  <i class="far fa-star" *ngFor="let star of createArray(5 - product.rating)"></i>
-                </div>
-                <span class="rating-count">({{product.reviews}})</span>
-              </div>
-              <div class="product-price">
-                <span class="current-price">{{formatCurrency(product.price)}}</span>
-                <span class="original-price" *ngIf="product.originalPrice">
-                  {{formatCurrency(product.originalPrice)}}
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Loading State -->
-        <div class="loading-state" *ngIf="loading">
-          <div class="loading-spinner">
-            <i class="fas fa-spinner fa-spin"></i>
-            <p>Loading products...</p>
-          </div>
-        </div>
-
-        <!-- Empty State -->
-        <div class="empty-state" *ngIf="!loading && filteredProducts.length === 0">
-          <div class="empty-state-content">
-            <i class="fas fa-search"></i>
-            <h3>No products found</h3>
-            <p>Try adjusting your filters or search terms to find what you're looking for.</p>
-            <div class="empty-state-actions">
-              <button class="btn btn-primary" (click)="clearFilters()">
-                <i class="fas fa-redo"></i> Clear Filters
-              </button>
-              <button class="btn btn-outline" (click)="loadProducts()">
-                <i class="fas fa-sync"></i> Refresh Products
-              </button>
-            </div>
-          </div>
-        </div>
-
-        <!-- Pagination -->
-        <div class="pagination" *ngIf="totalPages > 1">
-          <button class="pagination-btn" [disabled]="currentPage === 1" (click)="changePage(currentPage - 1)">
-            <i class="fas fa-chevron-left"></i>
-          </button>
-          
-          <div class="page-numbers">
-            <button *ngFor="let page of getPageNumbers()" 
-                    class="page-number" 
-                    [class.active]="page === currentPage"
-                    (click)="changePage(page)">
-              {{page}}
-            </button>
-          </div>
-          
-          <button class="pagination-btn" [disabled]="currentPage === totalPages" (click)="changePage(currentPage + 1)">
-            <i class="fas fa-chevron-right"></i>
-          </button>
-        </div>
-      </main>
-    </div>
+  <!-- Mobile Filter Button -->
+  <div class="mobile-filter-bar">
+    <button (click)="toggleFilters()">
+      <i class="fas fa-filter"></i> Filters
+    </button>
   </div>
-  
+
+  <div class="products-layout">
+
+    <!-- Sticky Sidebar -->
+    <aside class="filters-sidebar"
+           [class.closed]="!isFilterOpen">
+
+      <div class="filters-header">
+        <h3>Filters</h3>
+        <button (click)="clearFilters()">Clear</button>
+      </div>
+
+      <form [formGroup]="filterForm">
+
+        <input type="text"
+               formControlName="search"
+               placeholder="Search products">
+
+        <select formControlName="category">
+          <option value="">All Categories</option>
+          <option value="Electronics">Electronics</option>
+          <option value="Clothing">Clothing</option>
+          <option value="Sports">Sports</option>
+        </select>
+
+        <select formControlName="brand">
+          <option value="">All Brands</option>
+          <option value="Nike">Nike</option>
+          <option value="Adidas">Adidas</option>
+          <option value="Samsung">Samsung</option>
+          <option value="Apple">Apple</option>
+        </select>
+
+        <div class="price-range">
+          <input type="number" formControlName="minPrice" placeholder="Min">
+          <input type="number" formControlName="maxPrice" placeholder="Max">
+        </div>
+
+        <select formControlName="rating">
+          <option value="">All Ratings</option>
+          <option value="4">4+ Stars</option>
+          <option value="3">3+ Stars</option>
+        </select>
+
+      </form>
+
+    </aside>
+
+    <!-- Products -->
+    <main class="products-content">
+
+      <div class="products-grid">
+
+        <app-product-card
+          *ngFor="let product of displayedProducts"
+          [product]="product" routerLink="/products/1">
+        </app-product-card>
+
+      </div>
+
+    </main>
+
+  </div>
+
+  <app-footer></app-footer>
 
 </div>
-  <app-footer></app-footer>

@@ -3,8 +3,9 @@ import { CommonModule } from '@angular/common';
 import { Router } from '@angular/router';
 import { HttpClient } from '@angular/common/http';
 import { FormsModule, ReactiveFormsModule, FormBuilder, FormGroup } from '@angular/forms';
-import { Sidebar } from '../../../shared/components/sidebar/sidebar';
+
 import { NavItem } from '../../../shared/components/sidebar/sidebar';
+import { Navbar } from '../../../shared/components/navbar/navbar';
 
 interface Order {
   id: string;
@@ -30,7 +31,7 @@ interface Order {
 
 @Component({
   selector: 'app-orders',
-  imports: [CommonModule, FormsModule, ReactiveFormsModule, Sidebar],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, Navbar],
   templateUrl: './orders.html',
   styleUrl: './orders.css'
 })
@@ -198,7 +199,22 @@ export class Orders implements OnInit {
         return 'fas fa-question-circle';
     }
   }
-
+getStatusColor(status: string): string {
+  switch (status) {
+    case 'Pending':
+      return 'bg-yellow-100 text-yellow-700';
+    case 'Confirmed':
+      return 'bg-blue-100 text-blue-700';
+    case 'Shipped':
+      return 'bg-purple-100 text-purple-700';
+    case 'Delivered':
+      return 'bg-green-100 text-green-700';
+    case 'Cancelled':
+      return 'bg-red-100 text-red-700';
+    default:
+      return 'bg-gray-100 text-gray-700';
+  }
+}
   formatCurrency(price: number): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',

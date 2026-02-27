@@ -1,328 +1,305 @@
-<div class="checkout-page">
-  <app-sidebar [navItems]="navItems" [collapsed]="sidebarCollapsed"></app-sidebar>
-  
-  <div class="checkout-main" [class.sidebar-collapsed]="sidebarCollapsed">
-    <!-- Progress Bar -->
-    <div class="progress-bar">
-      <div class="progress-steps">
-        <div class="step" [class.active]="currentStep >= 1" [class.completed]="currentStep > 1">
-          <div class="step-number">1</div>
-          <div class="step-title">Shipping Address</div>
-        </div>
-        <div class="step-line" [class.completed]="currentStep > 1"></div>
-        <div class="step" [class.active]="currentStep >= 2" [class.completed]="currentStep > 2">
-          <div class="step-number">2</div>
-          <div class="step-title">Billing Address</div>
-        </div>
-        <div class="step-line" [class.completed]="currentStep > 2"></div>
-        <div class="step" [class.active]="currentStep >= 3" [class.completed]="currentStep > 3">
-          <div class="step-number">3</div>
-          <div class="step-title">Payment</div>
-        </div>
-      </div>
-    </div>
+<div class="bg-gray-50 min-h-screen">
 
-    <div class="checkout-content">
-      <!-- Step 1: Shipping Address -->
-      <div class="checkout-step" *ngIf="currentStep === 1">
-        <h2>Shipping Address</h2>
-        
-        <!-- Saved Addresses -->
-        <div class="saved-addresses" *ngIf="addresses.length > 0">
-          <h3>Select a saved address</h3>
-          <div class="address-list">
-            <div *ngFor="let address of addresses" class="address-card" 
-                 [class.selected]="selectedAddressId === address.id"
-                 (click)="selectAddress(address.id)">
-              <div class="address-info">
-                <div class="address-name">{{address.name}}</div>
-                <div class="address-details">
-                  {{address.street}}, {{address.city}}, {{address.state}} {{address.zipCode}}
-                </div>
-                <div class="address-phone">{{address.phone}}</div>
-                <span class="default-badge" *ngIf="address.isDefault">Default</span>
-              </div>
+  <app-navbar></app-navbar>
+
+  <div class="max-w-7xl mx-auto px-6 py-10">
+
+    <!-- PROGRESS STEPS -->
+    <ui-card class="p-6 mb-8">
+
+      <div class="flex items-center justify-between">
+
+        <div class="flex items-center gap-4 w-full">
+
+          <!-- Step 1 -->
+          <div class="flex items-center gap-2">
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+              [ngClass]="{
+                'bg-orange-500 text-white': currentStep >= 1,
+                'bg-gray-200 text-gray-600': currentStep < 1
+              }">
+              1
             </div>
+            <span class="font-semibold">Shipping</span>
           </div>
-          <button class="btn btn-outline" (click)="addNewAddress()">
-            <i class="fas fa-plus"></i> Add New Address
-          </button>
+
+          <div class="flex-1 h-1 bg-gray-200 rounded-full"
+               [ngClass]="{'bg-orange-500': currentStep > 1}">
+          </div>
+
+          <!-- Step 2 -->
+          <div class="flex items-center gap-2">
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+              [ngClass]="{
+                'bg-orange-500 text-white': currentStep >= 2,
+                'bg-gray-200 text-gray-600': currentStep < 2
+              }">
+              2
+            </div>
+            <span class="font-semibold">Billing</span>
+          </div>
+
+          <div class="flex-1 h-1 bg-gray-200 rounded-full"
+               [ngClass]="{'bg-orange-500': currentStep > 2}">
+          </div>
+
+          <!-- Step 3 -->
+          <div class="flex items-center gap-2">
+            <div
+              class="w-10 h-10 rounded-full flex items-center justify-center font-bold"
+              [ngClass]="{
+                'bg-orange-500 text-white': currentStep >= 3,
+                'bg-gray-200 text-gray-600': currentStep < 3
+              }">
+              3
+            </div>
+            <span class="font-semibold">Payment</span>
+          </div>
+
         </div>
 
-        <!-- New Address Form -->
-        <div class="address-form" *ngIf="selectedAddressId === null || addresses.length === 0">
-          <h3>{{addresses.length > 0 ? 'Add New Address' : 'Shipping Address'}}</h3>
-          <form [formGroup]="shippingForm" (ngSubmit)="saveAddress()">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Full Name *</label>
-                <input type="text" formControlName="name" class="form-control">
-                <div class="error" *ngIf="shippingForm.get('name')?.invalid && shippingForm.get('name')?.touched">
-                  Full name is required
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Phone Number *</label>
-                <input type="tel" formControlName="phone" class="form-control">
-                <div class="error" *ngIf="shippingForm.get('phone')?.invalid && shippingForm.get('phone')?.touched">
-                  Phone number is required
-                </div>
-              </div>
+      </div>
+
+    </ui-card>
+
+    <!-- MAIN GRID -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+
+      <!-- LEFT SIDE (FORMS) -->
+      <div class="lg:col-span-2 space-y-8">
+
+        <!-- STEP 1 -->
+        <ui-card *ngIf="currentStep === 1" class="p-8">
+
+          <h2 class="text-2xl font-bold mb-6">
+            Shipping Address
+          </h2>
+
+          <form [formGroup]="shippingForm" class="space-y-5">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+              <ui-input
+                label="Full Name"
+                formControlName="name">
+              </ui-input>
+
+              <ui-input
+                label="Phone"
+                formControlName="phone">
+              </ui-input>
+
             </div>
-            
-            <div class="form-group">
-              <label>Street Address *</label>
-              <input type="text" formControlName="street" class="form-control">
-              <div class="error" *ngIf="shippingForm.get('street')?.invalid && shippingForm.get('street')?.touched">
-                Street address is required
-              </div>
+
+            <ui-input
+              label="Street Address"
+              formControlName="street">
+            </ui-input>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+              <ui-input label="City" formControlName="city"></ui-input>
+              <ui-input label="State" formControlName="state"></ui-input>
+
             </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>City *</label>
-                <input type="text" formControlName="city" class="form-control">
-                <div class="error" *ngIf="shippingForm.get('city')?.invalid && shippingForm.get('city')?.touched">
-                  City is required
-                </div>
-              </div>
-              <div class="form-group">
-                <label>State *</label>
-                <input type="text" formControlName="state" class="form-control">
-                <div class="error" *ngIf="shippingForm.get('state')?.invalid && shippingForm.get('state')?.touched">
-                  State is required
-                </div>
-              </div>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>ZIP Code *</label>
-                <input type="text" formControlName="zipCode" class="form-control">
-                <div class="error" *ngIf="shippingForm.get('zipCode')?.invalid && shippingForm.get('zipCode')?.touched">
-                  ZIP code is required
-                </div>
-              </div>
-              <div class="form-group">
-                <label>Country *</label>
-                <select formControlName="country" class="form-control">
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+
+              <ui-input label="Zip Code" formControlName="zipCode"></ui-input>
+
+              <div>
+                <label class="font-semibold block mb-2">Country</label>
+                <select formControlName="country"
+                        class="w-full p-3 rounded-2xl border focus:outline-none focus:ring-2 focus:ring-orange-400">
                   <option value="US">United States</option>
                   <option value="CA">Canada</option>
                   <option value="UK">United Kingdom</option>
                 </select>
               </div>
-            </div>
-            
-            <div class="form-group">
-              <label class="checkbox-label">
-                <input type="checkbox" formControlName="saveAddress">
-                Save this address for future orders
-              </label>
-            </div>
-            
-            <button type="submit" class="btn btn-primary" *ngIf="addresses.length === 0">
-              Continue to Billing
-            </button>
-          </form>
-        </div>
-      </div>
 
-      <!-- Step 2: Billing Address -->
-      <div class="checkout-step" *ngIf="currentStep === 2">
-        <h2>Billing Address</h2>
-        
-        <div class="same-as-shipping">
-          <label class="checkbox-label">
-            <input type="checkbox" [(ngModel)]="sameAsShipping">
-            Same as shipping address
+            </div>
+
+          </form>
+
+        </ui-card>
+
+        <!-- STEP 2 -->
+        <ui-card *ngIf="currentStep === 2" class="p-8">
+
+          <h2 class="text-2xl font-bold mb-6">
+            Billing Address
+          </h2>
+
+          <label class="flex items-center gap-3 mb-6">
+            <input type="checkbox"
+                   [(ngModel)]="sameAsShipping"
+                   class="w-5 h-5">
+            Same as Shipping
           </label>
-        </div>
 
-        <div class="billing-form" *ngIf="!sameAsShipping">
-          <h3>Billing Address</h3>
-          <form [formGroup]="billingForm">
-            <div class="form-row">
-              <div class="form-group">
-                <label>Full Name *</label>
-                <input type="text" formControlName="name" class="form-control">
-              </div>
-              <div class="form-group">
-                <label>Phone Number *</label>
-                <input type="tel" formControlName="phone" class="form-control">
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label>Street Address *</label>
-              <input type="text" formControlName="street" class="form-control">
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>City *</label>
-                <input type="text" formControlName="city" class="form-control">
-              </div>
-              <div class="form-group">
-                <label>State *</label>
-                <input type="text" formControlName="state" class="form-control">
-              </div>
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>ZIP Code *</label>
-                <input type="text" formControlName="zipCode" class="form-control">
-              </div>
-              <div class="form-group">
-                <label>Country *</label>
-                <select formControlName="country" class="form-control">
-                  <option value="US">United States</option>
-                  <option value="CA">Canada</option>
-                  <option value="UK">United Kingdom</option>
-                </select>
-              </div>
-            </div>
+          <form *ngIf="!sameAsShipping"
+                [formGroup]="billingForm"
+                class="space-y-5">
+
+            <ui-input label="Full Name" formControlName="name"></ui-input>
+            <ui-input label="Phone" formControlName="phone"></ui-input>
+            <ui-input label="Street" formControlName="street"></ui-input>
+
           </form>
-        </div>
+
+        </ui-card>
+
+        <!-- STEP 3 -->
+        <ui-card *ngIf="currentStep === 3" class="p-8">
+
+          <h2 class="text-2xl font-bold mb-6">
+            Payment Method
+          </h2>
+
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+
+            <div
+              (click)="selectPaymentMethod('card')"
+              class="p-4 rounded-2xl border cursor-pointer transition"
+              [ngClass]="{
+                'border-orange-500 bg-orange-50': paymentMethod === 'card',
+                'border-gray-200 hover:border-orange-400': paymentMethod !== 'card'
+              }">
+              💳 Card
+            </div>
+
+            <div
+              (click)="selectPaymentMethod('upi')"
+              class="p-4 rounded-2xl border cursor-pointer transition"
+              [ngClass]="{
+                'border-orange-500 bg-orange-50': paymentMethod === 'upi',
+                'border-gray-200 hover:border-orange-400': paymentMethod !== 'upi'
+              }">
+              📱 UPI
+            </div>
+
+            <div
+              (click)="selectPaymentMethod('cod')"
+              class="p-4 rounded-2xl border cursor-pointer transition"
+              [ngClass]="{
+                'border-orange-500 bg-orange-50': paymentMethod === 'cod',
+                'border-gray-200 hover:border-orange-400': paymentMethod !== 'cod'
+              }">
+              💵 COD
+            </div>
+
+          </div>
+
+          <!-- Card Form -->
+          <form *ngIf="paymentMethod === 'card'"
+                [formGroup]="paymentForm"
+                class="space-y-5">
+
+            <ui-input label="Card Number" formControlName="cardNumber"></ui-input>
+            <ui-input label="Cardholder Name" formControlName="cardName"></ui-input>
+
+            <div class="grid grid-cols-2 gap-5">
+              <ui-input label="Expiry (MM/YY)" formControlName="expiryDate"></ui-input>
+              <ui-input label="CVV" formControlName="cvv"></ui-input>
+            </div>
+
+          </form>
+
+        </ui-card>
+
       </div>
 
-      <!-- Step 3: Payment -->
-      <div class="checkout-step" *ngIf="currentStep === 3">
-        <h2>Payment Method</h2>
-        
-        <div class="payment-methods">
-          <div class="payment-method" [class.selected]="paymentMethod === 'card'" (click)="selectPaymentMethod('card')">
-            <i class="fas fa-credit-card"></i>
-            <div class="method-info">
-              <div class="method-name">Credit/Debit Card</div>
-              <div class="method-desc">Visa, Mastercard, Amex, Discover</div>
-            </div>
-          </div>
-          
-          <div class="payment-method" [class.selected]="paymentMethod === 'upi'" (click)="selectPaymentMethod('upi')">
-            <i class="fas fa-mobile-alt"></i>
-            <div class="method-info">
-              <div class="method-name">UPI</div>
-              <div class="method-desc">Pay with UPI apps</div>
-            </div>
-          </div>
-          
-          <div class="payment-method" [class.selected]="paymentMethod === 'cod'" (click)="selectPaymentMethod('cod')">
-            <i class="fas fa-money-bill-wave"></i>
-            <div class="method-info">
-              <div class="method-name">Cash on Delivery</div>
-              <div class="method-desc">Pay when you receive</div>
-            </div>
-          </div>
-        </div>
+      <!-- RIGHT SIDE (ORDER SUMMARY) -->
+      <div class="lg:sticky lg:top-24 h-fit">
 
-        <!-- Card Payment Form -->
-        <div class="payment-form" *ngIf="paymentMethod === 'card'">
-          <h3>Card Details</h3>
-          <form [formGroup]="paymentForm">
-            <div class="form-group">
-              <label>Card Number *</label>
-              <input type="text" formControlName="cardNumber" class="form-control" placeholder="1234 5678 9012 3456">
-              <div class="error" *ngIf="paymentForm.get('cardNumber')?.invalid && paymentForm.get('cardNumber')?.touched">
-                Valid card number is required
-              </div>
-            </div>
-            
-            <div class="form-group">
-              <label>Cardholder Name *</label>
-              <input type="text" formControlName="cardName" class="form-control" placeholder="John Doe">
-            </div>
-            
-            <div class="form-row">
-              <div class="form-group">
-                <label>Expiry Date *</label>
-                <input type="text" formControlName="expiryDate" class="form-control" placeholder="MM/YY">
-                <div class="error" *ngIf="paymentForm.get('expiryDate')?.invalid && paymentForm.get('expiryDate')?.touched">
-                  Valid expiry date is required
+        <ui-card class="p-6">
+
+          <h3 class="text-xl font-bold mb-6">
+            Order Summary
+          </h3>
+
+          <div class="space-y-4">
+
+            <div *ngFor="let item of cartItems"
+                 class="flex items-center gap-4">
+
+              <img [src]="item.product.image"
+                   class="w-16 h-16 object-cover rounded-xl">
+
+              <div class="flex-1">
+                <div class="font-semibold text-sm">
+                  {{item.product.name}}
+                </div>
+                <div class="text-gray-500 text-xs">
+                  Qty: {{item.quantity}}
                 </div>
               </div>
-              <div class="form-group">
-                <label>CVV *</label>
-                <input type="text" formControlName="cvv" class="form-control" placeholder="123">
-                <div class="error" *ngIf="paymentForm.get('cvv')?.invalid && paymentForm.get('cvv')?.touched">
-                  Valid CVV is required
-                </div>
+
+              <div class="font-semibold text-orange-500">
+                {{formatCurrency(item.product.price * item.quantity)}}
               </div>
-            </div>
-            
-            <div class="form-group">
-              <label class="checkbox-label">
-                <input type="checkbox" formControlName="saveCard">
-                Save this card for future orders
-              </label>
-            </div>
-          </form>
-        </div>
 
-        <!-- UPI Payment -->
-        <div class="payment-form" *ngIf="paymentMethod === 'upi'">
-          <h3>UPI Payment</h3>
-          <p>You will be redirected to your UPI app to complete the payment.</p>
-        </div>
+            </div>
 
-        <!-- COD Payment -->
-        <div class="payment-form" *ngIf="paymentMethod === 'cod'">
-          <h3>Cash on Delivery</h3>
-          <p>Please keep the exact amount ready at the time of delivery.</p>
-        </div>
+          </div>
+
+          <div class="border-t mt-6 pt-6 space-y-3">
+
+            <div class="flex justify-between">
+              <span>Subtotal</span>
+              <span>{{formatCurrency(orderSummary.subtotal)}}</span>
+            </div>
+
+            <div class="flex justify-between">
+              <span>Tax</span>
+              <span>{{formatCurrency(orderSummary.tax)}}</span>
+            </div>
+
+            <div class="flex justify-between">
+              <span>Shipping</span>
+              <span>{{orderSummary.shipping === 0 ? 'Free' : formatCurrency(orderSummary.shipping)}}</span>
+            </div>
+
+            <div class="flex justify-between font-bold text-lg pt-3 border-t">
+              <span>Total</span>
+              <span class="text-orange-500">
+                {{formatCurrency(orderSummary.total)}}
+              </span>
+            </div>
+
+          </div>
+
+        </ui-card>
+
       </div>
 
-      <!-- Order Summary Sidebar -->
-      <div class="order-summary-sidebar">
-        <h3>Order Summary</h3>
-        
-        <div class="summary-items">
-          <div *ngFor="let item of cartItems" class="summary-item">
-            <img [src]="item.product.image" [alt]="item.product.name" class="item-image">
-            <div class="item-details">
-              <div class="item-name">{{item.product.name}}</div>
-              <div class="item-quantity">Qty: {{item.quantity}}</div>
-            </div>
-            <div class="item-price">{{formatCurrency(item.product.price * item.quantity)}}</div>
-          </div>
-        </div>
-        
-        <div class="summary-totals">
-          <div class="summary-row">
-            <span>Subtotal</span>
-            <span>{{formatCurrency(orderSummary.subtotal)}}</span>
-          </div>
-          <div class="summary-row">
-            <span>Tax</span>
-            <span>{{formatCurrency(orderSummary.tax)}}</span>
-          </div>
-          <div class="summary-row">
-            <span>Shipping</span>
-            <span *ngIf="orderSummary.shipping === 0">Free</span>
-            <span *ngIf="orderSummary.shipping > 0">{{formatCurrency(orderSummary.shipping)}}</span>
-          </div>
-          <div class="summary-divider"></div>
-          <div class="summary-row total">
-            <span>Total</span>
-            <span>{{formatCurrency(orderSummary.total)}}</span>
-          </div>
-        </div>
-      </div>
     </div>
 
-    <!-- Navigation Buttons -->
-    <div class="checkout-actions">
-      <button class="btn btn-outline" (click)="previousStep()" *ngIf="currentStep > 1">
-        <i class="fas fa-arrow-left"></i> Previous
-      </button>
-      
-      <button class="btn btn-primary" (click)="nextStep()" *ngIf="currentStep < 3">
-        Next <i class="fas fa-arrow-right"></i>
-      </button>
-      
-      <button class="btn btn-success btn-large" (click)="placeOrder()" *ngIf="currentStep === 3" [disabled]="loading">
-        <i class="fas fa-lock"></i> Place Order
-      </button>
+    <!-- ACTION BUTTONS -->
+    <div class="flex justify-between mt-10">
+
+      <ui-button variant="outline"
+                 *ngIf="currentStep > 1"
+                 (click)="previousStep()">
+        Previous
+      </ui-button>
+
+      <ui-button variant="primary"
+                 *ngIf="currentStep < 3"
+                 (click)="nextStep()">
+        Next
+      </ui-button>
+
+      <ui-button variant="primary"
+                 *ngIf="currentStep === 3"
+                 (click)="placeOrder()">
+        Place Order
+      </ui-button>
+
     </div>
+
   </div>
+
 </div>
